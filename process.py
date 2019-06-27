@@ -6,7 +6,7 @@ import sys
 '''
 def execute_script(cmd_line):
     """execute script inside program"""
-    
+    '''
     process = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     # Poll process for new output until finished
@@ -24,7 +24,8 @@ def execute_script(cmd_line):
         return output
     else:
         print("Failed!")
-        
+    '''
+    subprocess.run(cmd_line, shell = True, check = True, stdout = subprocess.PIPE)
         
 def process_sample(name,current_path,args):
     '''
