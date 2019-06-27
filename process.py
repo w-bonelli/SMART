@@ -26,7 +26,7 @@ def execute_script(cmd_line):
         print("Failed!")
         
         
-def process_sample(name,path,args):
+def process_sample(name,current_path,args):
     '''
         Process a sample within the collection.
 
