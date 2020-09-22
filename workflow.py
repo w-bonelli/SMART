@@ -32,7 +32,7 @@ WORKFLOW_CONFIG = {
     # process_sample(). The provided singularity container must have
     # python3 installed. And it must be executable using the
     # 'python3' command.
-    "singularity_url": "shub://lsx1980/plant-image-analysis",
+    "singularity_url": "singularity shell shub://lsx1980/plant-image-analysis",
 }
 
 #Defines the arguments that are passed to process_sample.

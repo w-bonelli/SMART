@@ -1,0 +1,10 @@
+name: Plant Image Analysis
+author: Suxing Liu
+public: True
+clone: True
+from: Directory
+to: File
+image: shub://w-bonelli/plant-image-analysis
+commands: python /opt/code/trait_extract_parallel.py -p $INPUT -ft $FILETYPE
+params:
+ - filetype

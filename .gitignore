@@ -1,0 +1,8 @@
+*.xlsx
+__pycache__/
+bin/
+lib/
+pyvenv.cfg
+share/
+*.jpeg
+utils.pyc
