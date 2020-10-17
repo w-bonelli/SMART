@@ -1,10 +1,10 @@
-name: Arabidopsis Rosette Analysis
+name: Plant Image Analysis
 author: Suxing Liu
 public: True
 clone: True
 from: Directory
-to: File
+to: Directory
 image: shub://w-bonelli/plant-image-analysis
-commands: python /opt/code/trait_extract_parallel.py -p $INPUT -ft $FILETYPE
+commands: python3 plant-image-analysis/trait_extract_parallel.py -p "$INPUT" -ft "$FILETYPE"
 params:
  - filetype

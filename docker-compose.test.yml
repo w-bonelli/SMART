@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  sandbox:
+    image: computationalplantscience/plantit-sandbox
+    environment:
+      - CYVERSE_USERNAME=${CYVERSE_USERNAME}
+      - CYVERSE_PASSWORD=${CYVERSE_PASSWORD}
+    volumes:
+      - .:/opt/plantit-cluster/
+    privileged: true

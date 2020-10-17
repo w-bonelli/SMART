@@ -1,10 +1,10 @@
-'''
+"""
 Name: color_segmentation.py
 
 Version: 1.0
 
-Summary:  Extract plant traits (leaf area, width, height, ) by paralell processing 
-    
+Summary:  Extract plant traits (leaf area, width, height, ) by paralell processing
+
 Author: suxing liu
 
 Author-email: suxingliu@gmail.com
@@ -16,85 +16,29 @@ USAGE:
 time python trait_extract.py -i trial3.jpg -s gray -n 3
 
 
-'''
-
-# import the necessary packages
-import os
+"""
 
 import argparse
-from sklearn.cluster import KMeans
+import os
+import warnings
 
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import ndimage
+from scipy.spatial import distance as dist
+from skimage import img_as_float, img_as_ubyte, img_as_bool
 from skimage.feature import peak_local_max
 from skimage.morphology import watershed, medial_axis
-from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
-from skimage import measure
+from sklearn.cluster import KMeans
 
-from scipy.spatial import distance as dist
-from scipy import optimize
-from scipy import ndimage
+from tools.curvature import ComputeCurvature
 
-import numpy as np
-import argparse
-import cv2
-
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-
-
-from openpyxl import load_workbook
-from openpyxl import Workbook
-
-import warnings
 warnings.filterwarnings("ignore")
 
 
 
 MBFACTOR = float(1<<20)
-
-class ComputeCurvature:
-
-    def __init__(self,x,y):
-        """ Initialize some variables """
-        self.xc = 0  # X-coordinate of circle center
-        self.yc = 0  # Y-coordinate of circle center
-        self.r = 0   # Radius of the circle
-        self.xx = np.array([])  # Data points
-        self.yy = np.array([])  # Data points
-        self.x = x  # X-coordinate of circle center
-        self.y = y  # Y-coordinate of circle center
-
-    def calc_r(self, xc, yc):
-        """ calculate the distance of each 2D points from the center (xc, yc) """
-        return np.sqrt((self.xx-xc)**2 + (self.yy-yc)**2)
-
-    def f(self, c):
-        """ calculate the algebraic distance between the data points and the mean circle centered at c=(xc, yc) """
-        ri = self.calc_r(*c)
-        return ri - ri.mean()
-
-    def df(self, c):
-        """ Jacobian of f_2b
-        The axis corresponding to derivatives must be coherent with the col_deriv option of leastsq"""
-        xc, yc = c
-        df_dc = np.empty((len(c), self.x.size))
-
-        ri = self.calc_r(xc, yc)
-        df_dc[0] = (xc - self.x)/ri                   # dR/dxc
-        df_dc[1] = (yc - self.y)/ri                   # dR/dyc
-        df_dc = df_dc - df_dc.mean(axis=1)[:, np.newaxis]
-        return df_dc
-
-    def fit(self, xx, yy):
-        self.xx = xx
-        self.yy = yy
-        center_estimate = np.r_[np.mean(xx), np.mean(yy)]
-        center = optimize.leastsq(self.f, center_estimate, Dfun=self.df, col_deriv=True)[0]
-
-        self.xc, self.yc = center
-        ri = self.calc_r(*center)
-        self.r = ri.mean()
-
-        return 1 / self.r  # Return the curvature
 
 
 # generate foloder to store the output results
@@ -113,13 +57,13 @@ def mkdir(path):
     # process
     if not isExists:
         # construct the path and folder
-        print path + ' folder constructed!'
+        print(path + ' folder constructed!')
         # make dir
         os.makedirs(path)
         return True
     else:
         # if exists, return 
-        print path+' path exists!'
+        print(path+' path exists!')
         return False
         
 
@@ -438,7 +382,7 @@ def extract_traits(image):
     mkpath = os.path.dirname(abs_path) +'/' + base_name
     mkdir(mkpath)
     save_path = mkpath + '/'
-    print "results_folder: " + save_path  
+    print("results_folder: " + save_path)
     
     if (file_size > 5.0):
         print("It will take some time due to larger file size {0} MB".format(str(int(file_size))))
@@ -510,7 +454,7 @@ if __name__ == '__main__':
     image = cv2.imread(args['image'])
     
     print(image.shape)
-    print image.dtype
+    print(image.dtype)
     
     if args['color_space'] == 'gray':
         

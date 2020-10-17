@@ -2,13 +2,7 @@ Bootstrap: docker
 From: ubuntu:18.04
 
 %labels
-	Maintainer: Suxing Liu
-
-%setup
-	mkdir ${SINGULARITY_ROOTFS}/opt/code/
-
-%files
-	./* /opt/code/
+	Maintainer: Suxing Liu, Wes Bonelli
 
 %post
 	apt update && \
@@ -23,26 +17,18 @@ From: ubuntu:18.04
 		libfontconfig1 \
 		libxrender1
 
+	pip3 install --upgrade pip && \
 	pip3 install numpy \
 		Pillow \
 		scipy \
+		scikit-build \
 		scikit-image \
 		scikit-learn \
 		matplotlib \
 		opencv-python \
-		openpyxl
-
+		openpyxl \
+		seaborn \
+		imutils && \
+	pip3 install numpy --upgrade
 	mkdir /lscratch /db /work /scratch
-  
-	chmod -R a+rwx /opt/code/
-  
-%environment
-	PYTHONPATH=$PYTHONPATH:/opt/code/
-	export PATH
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/code/
-	export LD_LIBRARY_PATH
-
-%runscript
-	echo "Arguments received: $*"
-	exec /usr/bin/python "$@"
   
