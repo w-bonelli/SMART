@@ -9,3 +9,8 @@ commands: python3 plant-image-analysis/trait_extract_parallel.py -p "$INPUT" -ft
 logo: rosette_logo.jpg
 params:
  - filetype
+resources:
+  time: "02:00:00"
+  mem: "31GB"
+  tasks: 1
+  cores: 12
