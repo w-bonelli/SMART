@@ -5,7 +5,7 @@ clone: True
 from: Directory
 to: Directory
 image: shub://w-bonelli/plant-image-analysis
-commands: python3 plant-image-analysis/trait_extract_parallel.py -p "$INPUT" -ft "$FILETYPE"
+commands: python3 arabidopsis-rosette-analysis/trait_extract_parallel.py -p "$INPUT" -ft "$FILETYPE"
 logo: rosette_logo.jpg
 params:
  - filetype
