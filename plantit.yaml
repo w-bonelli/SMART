@@ -1,16 +1,15 @@
-name: Arabidopsis Rosette Analysis
+name: Plant Image Analysis
 author: Suxing Liu
 public: True
 clone: True
 from: Directory
 to: Directory
-image: shub://w-bonelli/plant-image-analysis
-commands: python3 arabidopsis-rosette-analysis/trait_extract_parallel.py -p "$INPUT" -ft "$FILETYPE"
-logo: rosette_logo.jpg
+image: docker://computationalplantscience/arabidopsis-rosette-analysis
+commands: python3 plant-image-analysis/trait_extract_parallel.py -p "$INPUT" -ft "$FILETYPE"
 params:
  - filetype
 resources:
-  time: "02:00:00"
-  mem: "31GB"
+  time: "01:00:00"
+  mem: "10GB"
   tasks: 1
-  cores: 12
+  cores: 4
