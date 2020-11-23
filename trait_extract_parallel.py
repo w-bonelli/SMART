@@ -703,10 +703,11 @@ if __name__ == '__main__':
         result = pool.map(extract_traits, input_images)
         pool.terminate()
 
-    if output_dir is None:
-        output_dir = 'output'
-
-    Path(output_dir).mkdir(exist_ok=True)
+    # if output dir provided, create it (if needed). otherwise use current directory
+    if output_dir is not None:
+        Path(output_dir).mkdir(exist_ok=True)
+    else:
+        output_dir = ''
 
     trait_file = join(output_dir, 'trait.xlsx')
     print(f"Writing trait file '{trait_file}'...")
