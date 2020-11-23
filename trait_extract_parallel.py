@@ -3,9 +3,9 @@ Name: trait_extract_parallel.py
 
 Version: 1.0
 
-Summary: Extract plant traits (leaf area, width, height, ) by paralell processing
+Summary: Extract plant traits (leaf area, width, height, solidity, curvature) by parallel processing
 
-Author: suxing liu
+Author: Suxing Liu
 
 Author-email: suxingliu@gmail.com
 
@@ -13,9 +13,7 @@ Created: 2018-09-29
 
 USAGE:
 
-time python3 trait_extract_parallel.py -p /home/suxingliu/plant-image-analysis/test/ -ft jpg
-
-
+time python3 trait_extract_parallel.py -i /input/directory -o /output/directory -ft jpg
 """
 
 import argparse
@@ -54,32 +52,6 @@ from contextlib import closing
 MBFACTOR = float(1 << 20)
 
 
-# generate foloder to store the output results
-def mkdir(path):
-    # import module
-    import os
-
-    # remove space at the beginning
-    path = path.strip()
-    # remove slash at the end
-    path = path.rstrip("\\")
-
-    # path exist?   # True  # False
-    isExists = os.path.exists(path)
-
-    # process
-    if not isExists:
-        # construct the path and folder
-        # print path + ' folder constructed!'
-        # make dir
-        os.makedirs(path)
-        return True
-    else:
-        # if exists, return 
-        # print path+' path exists!'
-        return False
-
-
 def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     # Change image color space, if necessary.
     colorSpace = args_colorspace.lower()
@@ -107,9 +79,6 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
             image.reshape(image.shape[0], image.shape[1], 1)
 
     (width, height, n_channel) = image.shape
-
-    # print("image shape: ")
-    # print(width, height, n_channel)
 
     # Flatten the 2D image array into an MxN feature vector, where M is the number of pixels and N is the dimension (number of channels).
     reshaped = image.reshape(image.shape[0] * image.shape[1], image.shape[2])
@@ -710,7 +679,8 @@ def extract_traits(image_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--path", required=True, help="path to input directory (containing image files)")
+    parser.add_argument("-i", "--input-path", required=True, help="path to input directory (containing image files)")
+    parser.add_argument("-o", "--output-path", required=False, help="path to directory to write output files")
     parser.add_argument("-ft", "--filetype", required=True, help="Image filetype")
     parser.add_argument('-s', '--color-space', type=str, default='lab',
                         help='Color space to use: BGR (default), HSV, Lab, YCrCb (YCC)')
@@ -722,17 +692,23 @@ if __name__ == '__main__':
                         help='Number of clusters for K-means clustering (default 3, min 2).')
 
     args = vars(parser.parse_args())
-    input_dir = args["path"]
+    input_dir = args["input-path"]
+    output_dir = args["output-path"] if 'output-path' in args else None
     input_images = sorted(glob.glob(f"{input_dir}/*.{args['filetype']}"))
     cpus = multiprocessing.cpu_count()
+
     print(f"Using {int(cpus)} cores to process {len(input_images)} images...")
 
     with closing(Pool(processes=cpus)) as pool:
         result = pool.map(extract_traits, input_images)
         pool.terminate()
 
-    Path('output').mkdir(exist_ok=True)
-    trait_file = join('output', 'trait.xlsx')
+    if output_dir is None:
+        output_dir = 'output'
+
+    Path(output_dir).mkdir(exist_ok=True)
+
+    trait_file = join(output_dir, 'trait.xlsx')
     print(f"Writing trait file '{trait_file}'...")
 
     if os.path.isfile(trait_file):
