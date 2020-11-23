@@ -12,7 +12,7 @@ Robust and parameter-free plant image segmentation and trait extraction.
 
 ## Requirements
 
-Either [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/) is required to run this code in a Unix environment.
+Either [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/) is required to run this project in a Unix environment.
 
 ## Usage
 
