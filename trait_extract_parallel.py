@@ -679,8 +679,8 @@ def extract_traits(image_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input-path", required=True, help="path to input directory (containing image files)")
-    parser.add_argument("-o", "--output-path", required=False, help="path to directory to write output files")
+    parser.add_argument("-i", "--input", required=True, help="path to input directory (containing image files)")
+    parser.add_argument("-o", "--output", required=False, help="path to directory to write output files")
     parser.add_argument("-ft", "--filetype", required=True, help="Image filetype")
     parser.add_argument('-s', '--color-space', type=str, default='lab',
                         help='Color space to use: BGR (default), HSV, Lab, YCrCb (YCC)')
@@ -692,8 +692,8 @@ if __name__ == '__main__':
                         help='Number of clusters for K-means clustering (default 3, min 2).')
 
     args = vars(parser.parse_args())
-    input_dir = args["input-path"]
-    output_dir = args["output-path"] if 'output-path' in args else None
+    input_dir = args["input"]
+    output_dir = args["output"] if 'output-path' in args else None
     input_images = sorted(glob.glob(f"{input_dir}/*.{args['filetype']}"))
     cpus = multiprocessing.cpu_count()
 
