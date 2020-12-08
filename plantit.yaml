@@ -3,6 +3,7 @@ author: Suxing Liu
 public: True
 clone: True
 from: 
+from_directory: True
 to: output
 image: docker://computationalplantscience/arabidopsis-rosette-analysis
 commands: python3 arabidopsis-rosette-analysis/trait_extract_parallel.py -i "$INPUT" -ft "$FILETYPE"
