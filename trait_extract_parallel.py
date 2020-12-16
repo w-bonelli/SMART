@@ -596,15 +596,12 @@ def color_region(image, mask, output_dir, num_clusters):
     return rgb_colors
 
 
-def extract_traits(image_path):
+def extract_traits(image_path, output_dir):
     print(image_path)
     image_abs_path = os.path.abspath(image_path)
     image_file_name, img_file_ext = os.path.splitext(image_abs_path)
     image_file_size = os.path.getsize(image_path) / MBFACTOR
     image_file = os.path.splitext(os.path.basename(image_file_name))[0]
-
-    output_dir = join(dirname(dirname(image_path)), 'output')
-    Path(output_dir).mkdir(exist_ok=True)
 
     print(f"Extracting traits for image '{image_file}' to '{output_dir}'... Segmenting image using automatic color clustering..." + f" File size is large: {str(image_file_size)} MB. This may take some time." if image_file_size > 5.0 else '')
 
@@ -693,29 +690,21 @@ if __name__ == '__main__':
 
     args = vars(parser.parse_args())
     input_dir = args["input"]
-    output_dir = args["output"] if 'output-path' in args else None
+    output_dir = args["output"] if 'output-path' in args else 'output'
+    Path(output_dir).mkdir(exist_ok=True) # create output dir
     input_images = sorted(glob.glob(f"{input_dir}/*.{args['filetype']}"))
     cpus = multiprocessing.cpu_count()
 
     print(f"Using {int(cpus)} cores to process {len(input_images)} images...")
 
     with closing(Pool(processes=cpus)) as pool:
-        result = pool.map(extract_traits, input_images)
+        result = pool.starmap(extract_traits, [(image, output_dir) for image in input_images])
         pool.terminate()
-
-    # if output dir provided, create it (if needed). otherwise use current directory
-    if output_dir is not None:
-        Path(output_dir).mkdir(exist_ok=True)
-    else:
-        output_dir = ''
 
     trait_file = join(output_dir, 'trait.xlsx')
     print(f"Writing trait file '{trait_file}'...")
 
-    if os.path.isfile(trait_file):
-        wb = load_workbook(trait_file)
-    else:
-        wb = Workbook()
+    wb = load_workbook(trait_file) if os.path.isfile(trait_file) else Workbook()
 
     sheet = wb.active
     sheet.cell(row=1, column=1).value = 'filename'

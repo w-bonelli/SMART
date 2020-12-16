@@ -14,3 +14,6 @@ utils.pyc
 *test/
 .cache/*
 tools/__pycache__/
+data
+input
+output
