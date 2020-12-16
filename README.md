@@ -2,7 +2,7 @@
 
 Author: Suxing Liu
 
-[![Build Status](https://travis-ci.com/Computational-Plant-Science/arabidopsis-rosette-analysis.svg?branch=master)](https://travis-ci.com/Computational-Plant-Science/arabidopsis-rosette-analysis)
+![CI](https://github.com/Computational-Plant-Science/arabidopsis-rosette-analysis/workflows/CI/badge.svg)
 
 Robust and parameter-free plant image segmentation and trait extraction.
 
