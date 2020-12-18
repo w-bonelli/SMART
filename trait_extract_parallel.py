@@ -692,7 +692,12 @@ if __name__ == '__main__':
     input_dir = args["input"]
     output_dir = args["output"] if 'output-path' in args else 'output'
     Path(output_dir).mkdir(exist_ok=True) # create output dir
-    input_images = sorted(glob.glob(f"{input_dir}/*.{args['filetype']}"))
+    input_images = []
+    for ext in args['filetype'].split(','):
+        print(f"Including files matching '{input_dir + '/*.' + ext}'")
+        input_images.extend(glob.glob(join(input_dir, f"*.{ext}")))
+    input_images = sorted(input_images)
+    print(f"Found files: {input_images}")
     cpus = multiprocessing.cpu_count()
 
     print(f"Using {int(cpus)} cores to process {len(input_images)} images...")
