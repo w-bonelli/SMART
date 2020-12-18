@@ -25,5 +25,5 @@ docker run -v "$(pwd)":/opt/arabidopsis-rosette-analysis -w /opt/arabidopsis-ros
 ### Singularity
 
 ```bash
-singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 trait_extract_parallel.py -i /input/directory -o /output/directory -ft jpg
+singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 trait_extract_parallel.py -i input -o output -ft "jpg,png"
 ```
