@@ -20,6 +20,6 @@ output:
 logo: rosette_logo.jpg
 resources:
   time: "02:00:00"
-  mem: "31GB"
+  mem: "5GB"
   tasks: 1
-  cores: 12
+  cores: 1
