@@ -21,5 +21,5 @@ logo: rosette_logo.jpg
 resources:
   time: "02:00:00"
   mem: "5GB"
-  tasks: 1
+  processes: 1
   cores: 1
