@@ -5,7 +5,7 @@ clone: True
 image: docker://computationalplantscience/arabidopsis-rosette-analysis
 commands: python3 arabidopsis-rosette-analysis/trait_extract_parallel.py -i "$INPUT" -ft "$FILETYPES"
 input:
-  kind: directory
+  kind: files
   path:
   filetypes:
     - jpg
