@@ -3,7 +3,7 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/arabidopsis-rosette-analysis
-commands: python3 arabidopsis-rosette-analysis/trait_extract_parallel.py -i "$INPUT" -ft "$FILETYPES"
+commands: python3 cli.py extract "$INPUT" -ft "$FILETYPES"
 input:
   kind: files
   path:
@@ -11,11 +11,10 @@ input:
     - jpg
     - png
 output:
-  path: output
+  path: input
   include:
     patterns:
-      - jpg
-      - png
+      - csv
       - xlsx
 logo: rosette_logo.jpg
 resources:

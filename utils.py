@@ -14,13 +14,59 @@ import utils
 
 
 # import the necessary packages
+import csv
+from os.path import join, isfile
+from typing import List
+
 import numpy as np
 import cv2
+import openpyxl
 from scipy import ndimage
 import pylab as P
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 from matplotlib.ticker import FormatStrFormatter
+from tabulate import tabulate
+
+from options import ArabidopsisRosetteAnalysisOptions
+from results import ArabidopsisRosetteAnalysisResult
+
+
+def write_results(output_directory: str, results: List[ArabidopsisRosetteAnalysisResult]):
+    headers = ['filename', 'area', 'solidity', 'max_width', 'max_height', 'avg_curv', 'n_leaves']
+    results = [(result.id, result.area, result.solidity, result.max_width, result.max_height, result.avg_curve, result.n_leaves) for result in results]
+    table = tabulate(results, headers=headers, tablefmt='orgtbl')
+    print(table)
+
+    traits_csv = join(output_directory, 'traits.csv')
+    traits_xslx = join(output_directory, 'traits.xlsx')
+
+    if isfile(traits_xslx):
+        wb = openpyxl.load_workbook(traits_xslx)
+        sheet = wb.active
+    else:
+        wb = openpyxl.Workbook()
+        sheet = wb.active
+
+        sheet.cell(row=1, column=1).value = 'filename'
+        sheet.cell(row=1, column=2).value = 'leaf_area'
+        sheet.cell(row=1, column=3).value = 'solidity'
+        sheet.cell(row=1, column=4).value = 'max_width'
+        sheet.cell(row=1, column=5).value = 'max_height'
+        sheet.cell(row=1, column=6).value = 'curvature'
+        sheet.cell(row=1, column=7).value = 'number_leaf'
+
+    for row in results:
+        sheet.append(row)
+
+    wb.save(traits_xslx)
+
+    with open(traits_csv, 'a+') as file:
+        writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(headers)
+        for row in results:
+            writer.writerow(row)
+
 
 
 # Function of rgb to hex color space

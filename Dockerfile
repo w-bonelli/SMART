@@ -2,6 +2,8 @@ FROM ubuntu:18.04
 
 LABEL maintainer="Suxing Liu, Wes Bonelli"
 
+COPY . /opt/arabidopsis-rosette-analysis
+
 RUN apt-get update && \
     apt-get install -y \
     build-essential \
@@ -15,16 +17,12 @@ RUN apt-get update && \
     libxrender1
 
 RUN pip3 install --upgrade pip && \
-    pip3 install --upgrade numpy && \
-    pip3 install Pillow \
-    scipy \
-    scikit-build \
-    scikit-image \
-    scikit-learn \
-    matplotlib \
-    opencv-python \
-    openpyxl \
-    seaborn \
-    imutils
+    pip3 install -r /opt/arabidopsis-rosette-analysis/requirements.txt 
 
-RUN mkdir /lscratch /db /work /scratch
+RUN chmod -R a+rwx /opt/arabidopsis-rosette-analysis/
+
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+ENV PYTHONPATH=/opt/arabidopsis-rosette-analysis/
+ENV LD_LIBRARY_PATH=/opt/arabidopsis-rosette-analysis/
+

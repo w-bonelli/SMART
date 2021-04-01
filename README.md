@@ -19,11 +19,11 @@ Either [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/sin
 ### Docker
 
 ```bash
-docker run -v "$(pwd)":/opt/arabidopsis-rosette-analysis -w /opt/arabidopsis-rosette-analysis computationalplantscience/arabidopsis-rosette-analysis python3 /opt/arabidopsis-rosette-analysis/trait_extract_parallel.py -i input -o output -ft "jpg,png"
+docker run -v "$(pwd)":/opt/arabidopsis-rosette-analysis -w /opt/arabidopsis-rosette-analysis computationalplantscience/arabidopsis-rosette-analysis python3 cli.py extract <file or directory>
 ```
 
 ### Singularity
 
 ```bash
-singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 trait_extract_parallel.py -i input -o output -ft "jpg,png"
+singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 python3 cli.py extract <file or directory>
 ```
