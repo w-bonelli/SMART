@@ -3,7 +3,7 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/arabidopsis-rosette-analysis
-commands: python3 cli.py extract "$INPUT" -ft "$FILETYPES"
+commands: python3 cli.py extract "$INPUT"
 input:
   kind: files
   path:
