@@ -39,34 +39,33 @@ def write_results(output_directory: str, results: List[ArabidopsisRosetteAnalysi
     print(table)
 
     traits_csv = join(output_directory, 'traits.csv')
-    traits_xslx = join(output_directory, 'traits.xlsx')
-
-    if isfile(traits_xslx):
-        wb = openpyxl.load_workbook(traits_xslx)
-        sheet = wb.active
-    else:
-        wb = openpyxl.Workbook()
-        sheet = wb.active
-
-        sheet.cell(row=1, column=1).value = 'filename'
-        sheet.cell(row=1, column=2).value = 'leaf_area'
-        sheet.cell(row=1, column=3).value = 'solidity'
-        sheet.cell(row=1, column=4).value = 'max_width'
-        sheet.cell(row=1, column=5).value = 'max_height'
-        sheet.cell(row=1, column=6).value = 'curvature'
-        sheet.cell(row=1, column=7).value = 'number_leaf'
-
-    for row in results:
-        sheet.append(row)
-
-    wb.save(traits_xslx)
-
     with open(traits_csv, 'a+') as file:
         writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(headers)
         for row in results:
             writer.writerow(row)
 
+    # traits_xslx = join(output_directory, 'traits.xlsx')
+
+    # if isfile(traits_xslx):
+    #     wb = openpyxl.load_workbook(traits_xslx)
+    #     sheet = wb.active
+    # else:
+    #     wb = openpyxl.Workbook()
+    #     sheet = wb.active
+
+    #     sheet.cell(row=1, column=1).value = 'filename'
+    #     sheet.cell(row=1, column=2).value = 'leaf_area'
+    #     sheet.cell(row=1, column=3).value = 'solidity'
+    #     sheet.cell(row=1, column=4).value = 'max_width'
+    #     sheet.cell(row=1, column=5).value = 'max_height'
+    #     sheet.cell(row=1, column=6).value = 'curvature'
+    #     sheet.cell(row=1, column=7).value = 'number_leaf'
+
+    # for row in results:
+    #     sheet.append(row)
+
+    # wb.save(traits_xslx)
 
 
 # Function of rgb to hex color space
