@@ -11,9 +11,10 @@ input:
     - jpg
     - png
 output:
-  path: input
+  path:
   include:
     patterns:
+      - png
       - csv
       - xlsx
 logo: rosette_logo.jpg
