@@ -342,9 +342,7 @@ def watershed_seg(orig, thresh, min_distance_value):
     return labels
 
 
-def individual_object_seg(orig, labels, save_path, base_name, file_extension):
-    
-    
+def individual_object_seg(orig, labels, save_path, base_name, file_extension, leaf_images: bool = False):
     (width, height, n_channel) = orig.shape
     
     for label in np.unique(labels):
@@ -361,9 +359,9 @@ def individual_object_seg(orig, labels, save_path, base_name, file_extension):
         # apply individual object mask
         masked = cv2.bitwise_and(orig, orig, mask = mask)
         
-        #define result path 
-        result_img_path = (save_path + base_name + '_leaf_' + str(label) + file_extension)
-        cv2.imwrite(result_img_path, masked)
+        if leaf_images:
+            result_img_path = (save_path + base_name + '_leaf_' + str(label) + file_extension)
+            cv2.imwrite(result_img_path, masked)
         
 
 

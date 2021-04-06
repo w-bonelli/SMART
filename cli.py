@@ -1,13 +1,10 @@
-import csv
 from contextlib import closing
 from glob import glob
 from multiprocessing import cpu_count, Pool
-from os.path import join, isfile
+from os.path import join
 from pathlib import Path
 
 import click
-import openpyxl
-from tabulate import tabulate
 
 from options import ArabidopsisRosetteAnalysisOptions
 from trait_extract_parallel import trait_extract
@@ -38,14 +35,13 @@ def extract(source, output_directory, file_types):
             raise ValueError(f"You must specify file types!")
 
         patterns = patterns + [pattern.upper() for pattern in patterns]
-        print(f"Searching for files with extension: {', '.join(patterns)}")
-        sources = sum((sorted(glob(join(source, f"*.{file_type}"))) for file_type in patterns), [])
-        print(f"Found {len(sources)} files: \n" + '\n'.join(sources))
+        files = sum((sorted(glob(join(source, f"*.{file_type}"))) for file_type in patterns), [])
+        print(f"Found {len(files)} files with extensions {', '.join(patterns)}: \n" + '\n'.join(files))
 
         processes = cpu_count()
-        options = [ArabidopsisRosetteAnalysisOptions(input_file=source, output_directory=output_directory) for source in sources]
+        options = [ArabidopsisRosetteAnalysisOptions(input_file=file, output_directory=output_directory) for file in files]
 
-        print(f"Using up to {processes} processes to extract traits from {len(sources)} images")
+        print(f"Using up to {processes} processes to extract traits from {len(files)} images")
         with closing(Pool(processes=processes)) as pool:
             results = pool.map(trait_extract, options)
             pool.terminate()
