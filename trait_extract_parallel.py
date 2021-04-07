@@ -1196,8 +1196,8 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
                 cv2.imwrite(opt.input_file, blended)
                 cv2.imwrite(join(opt.output_directory, f"{opt.input_stem}.blended.png"), blended)
                 ii += 1
-            left = i
-            right = i
+            left = None
+            right = None
             replaced += width
         i += 1
     print(f"Replaced {replaced} dark images with weighted blends of adjacent images")

@@ -20,7 +20,7 @@ def cli():
 @click.argument('source')
 @click.option('-o', '--output_directory', required=False, type=str, default='')
 @click.option('-ft', '--file_types', required=False, type=str, default='jpg,png')
-@click.option('-m', '--multiprocessing', required=False, type=bool, default=False)
+@click.option('-m', '--multiprocessing', is_flag=True)
 def extract(source, output_directory, file_types, multiprocessing):
     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
