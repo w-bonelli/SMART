@@ -1177,25 +1177,24 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
             if left is None:
                 left = i
             right = i
-        else:
-            if left is not None and left != right:
-                ii = 0
-                left_file = sorted_options[left].input_file
-                right_file = sorted_options[right].input_file
-                prev_file = sorted_options[left - 1].input_file
-                post_file = sorted_options[right + 1].input_file
-                print(f"Replacing {left_file} to {right_file} with merger of {prev_file} and {post_file}")
-                for opt in sorted_options[left:right + 1]:
-                    prev = cv2.imread(prev_file)
-                    post = cv2.imread(post_file)
-                    mask_proportion = ii / (right - left)
-                    print(f"Merging {prev_file} with {post_file} using mask value {mask_proportion}")
-                    mask = np.full(img.shape, mask_proportion)
-                    blended = cv2.addWeighted(prev, mask_proportion, post, 1 - mask_proportion, 0)
-                    cv2.imwrite(opt.input_file, blended)
-                    ii += 1
-                left = i
-                right = i
+        elif left is not None and left != right:
+            ii = 0
+            left_file = sorted_options[left].input_file
+            right_file = sorted_options[right].input_file
+            prev_file = sorted_options[left - 1].input_file
+            post_file = sorted_options[right + 1].input_file
+            print(f"Replacing {left_file} to {right_file} with merger of {prev_file} and {post_file}")
+            for opt in sorted_options[left:right + 1]:
+                prev = cv2.imread(prev_file)
+                post = cv2.imread(post_file)
+                mask_proportion = ii / (right - left)
+                print(f"Merging {prev_file} with {post_file} using mask value {mask_proportion}")
+                mask = np.full(img.shape, mask_proportion)
+                blended = cv2.addWeighted(prev, mask_proportion, post, 1 - mask_proportion, 0)
+                cv2.imwrite(opt.input_file, blended)
+                ii += 1
+            left = i
+            right = i
         i += 1
 
 
