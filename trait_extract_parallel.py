@@ -1171,7 +1171,6 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
     replaced = 0
     sorted_options = sorted(options, key=lambda o: o.timestamp)
     for option in sorted_options:
-        img = cv2.imread(option.input_file)
         img_name, mean_luminosity, luminosity_str = isbright(option)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
         write_results_to_csv([(img_name, mean_luminosity, luminosity_str)], option.output_directory)
         if luminosity_str == 'dark':
@@ -1185,13 +1184,16 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
             prev_file = sorted_options[left - 1].input_file
             next_file = sorted_options[right + 1].input_file
             print(f"Replacing {left_file} to {right_file} with merger of {prev_file} and {next_file}")
-            for opt in sorted_options[left:right + 1]:
+            for opt in reversed(sorted_options[left:right + 1]):
                 prev = cv2.imread(prev_file)
                 next = cv2.imread(next_file)
-                prev_weight = ii / (right - left)
-                next_weight = 1 - prev_weight
+                width = right - left + 1
+                offset = (1 / width)
+                prev_weight = ((ii / (right - left)) * ((width - 1) / width)) + offset
+                next_weight = ((1 - prev_weight) * ((width - 1) / width)) + offset
                 print(f"Merging {prev_file} (weight {prev_weight}) with {next_file} (weight: {next_weight})")
                 blended = cv2.addWeighted(prev, prev_weight, next, next_weight, 0)
+                cv2.imwrite(opt.input_file, blended)
                 cv2.imwrite(join(opt.output_directory, f"{opt.input_stem}.blended.png"), blended)
                 ii += 1
             left = i

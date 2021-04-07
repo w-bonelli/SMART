@@ -16,5 +16,4 @@ class ArabidopsisRosetteAnalysisOptions:
         hour = int(splt[4])
         minute = int(splt[5])
         second = int(splt[6].split('_')[0])
-        print(f"{year} {month} {day} {hour} {minute} {second}")
         self.timestamp = datetime(year, month, day, hour=hour, minute=minute, second=second)
