@@ -20,7 +20,8 @@ def cli():
 @click.argument('source')
 @click.option('-o', '--output_directory', required=False, type=str, default='')
 @click.option('-ft', '--file_types', required=False, type=str, default='jpg,png')
-def extract(source, output_directory, file_types):
+@click.option('-m', '--multiprocessing', required=False, type=bool, default=False)
+def extract(source, output_directory, file_types, multiprocessing):
     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
     if Path(source).is_file():
@@ -42,16 +43,19 @@ def extract(source, output_directory, file_types):
         files = sum((sorted(glob(join(source, f"*.{file_type}"))) for file_type in patterns), [])
         print(f"Found {len(files)} files with extensions {', '.join(patterns)}: \n" + '\n'.join(files))
 
-        processes = cpu_count()
         options = [ArabidopsisRosetteAnalysisOptions(input_file=file, output_directory=output_directory) for file in files]
-
         print(f"Checking image quality and replacing unusable with merged images")
         check_discard_merge(options)
 
-        print(f"Using up to {processes} processes to extract traits from {len(files)} images")
-        with closing(Pool(processes=processes)) as pool:
-            results = pool.map(trait_extract, options)
-            pool.terminate()
+        if multiprocessing:
+            processes = cpu_count()
+            print(f"Using up to {processes} processes to extract traits from {len(files)} images")
+            with closing(Pool(processes=processes)) as pool:
+                results = pool.map(trait_extract, options)
+                pool.terminate()
+        else:
+            print(f"Using a single process to extract traits from {len(files)} images")
+            results = [trait_extract(option) for option in options]
 
         write_results(options[0].output_directory, results)
 

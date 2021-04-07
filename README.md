@@ -27,3 +27,7 @@ docker run -v $(pwd):/opt/code -w /opt/code computationalplantscience/arabidopsi
 ```bash
 singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 cli.py extract <file or directory> -o <output directory>
 ```
+
+#### Multiprocessing
+
+To enable parallel processing on multiple cores at once, use the `-m` flag.
