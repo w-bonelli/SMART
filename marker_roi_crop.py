@@ -42,7 +42,7 @@ from pathlib import Path
 from options import ArabidopsisRosetteAnalysisOptions
 
 
-TEMPLATE_PATH = "/opt/code/marker_template/template.png"
+TEMPLATE_PATH = "/opt/arabidopsis-rosette-analysis/marker_template/template.png"
 
 
 def mkdir(path):
