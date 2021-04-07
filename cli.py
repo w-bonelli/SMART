@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 
 from options import ArabidopsisRosetteAnalysisOptions
-from trait_extract_parallel import trait_extract
+from trait_extract_parallel import trait_extract, check_discard_merge
 from utils import write_results
 
 
@@ -40,6 +40,9 @@ def extract(source, output_directory, file_types):
 
         processes = cpu_count()
         options = [ArabidopsisRosetteAnalysisOptions(input_file=file, output_directory=output_directory) for file in files]
+
+        print(f"Checking image quality and replacing unusable with merged images")
+        check_discard_merge(options)
 
         print(f"Using up to {processes} processes to extract traits from {len(files)} images")
         with closing(Pool(processes=processes)) as pool:

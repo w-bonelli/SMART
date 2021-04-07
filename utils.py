@@ -15,20 +15,16 @@ import utils
 
 # import the necessary packages
 import csv
-from os.path import join, isfile
+from os.path import join
 from typing import List
 
-import numpy as np
 import cv2
-import openpyxl
-from scipy import ndimage
-import pylab as P
-from matplotlib import pyplot as plt
 import matplotlib.colors as colors
+import numpy as np
+from matplotlib import pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 from tabulate import tabulate
 
-from options import ArabidopsisRosetteAnalysisOptions
 from results import ArabidopsisRosetteAnalysisResult
 
 
@@ -40,9 +36,15 @@ def write_results(output_directory: str, results: List[ArabidopsisRosetteAnalysi
 
     traits_csv = join(output_directory, 'traits.csv')
     with open(traits_csv, 'a+') as file:
-        writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(headers)
+
+        char = file.read(1)
+        file.seek(0)
+        if not char:
+            writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(headers)
+
         for row in results:
+            writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(row)
 
     # traits_xslx = join(output_directory, 'traits.xlsx')

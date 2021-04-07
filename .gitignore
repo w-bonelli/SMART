@@ -15,5 +15,7 @@ utils.pyc
 .cache/*
 tools/__pycache__/
 data
+dark
+data*
 input
 output

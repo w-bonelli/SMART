@@ -19,6 +19,7 @@ python3 color_cluster_cv.py -p ~/plant-image-analysis/test/ -ft jpg
 '''
 
 # import the necessary packages
+from os.path import join
 
 import numpy as np
 import cv2
@@ -282,7 +283,7 @@ def color_quantization(image, mask, save_path, num_clusters):
     
     
 
-def color_region(image, mask, save_path, num_clusters):
+def color_region(image, mask, output_directory, file_name, num_clusters):
     
     # read the image
      #grab image width and height
@@ -292,7 +293,7 @@ def color_region(image, mask, save_path, num_clusters):
     masked_image_ori = cv2.bitwise_and(image, image, mask = mask)
     
     #define result path for labeled images
-    result_img_path = save_path + 'masked.png'
+    result_img_path = join(output_directory, f"{file_name}.masked.png")
     cv2.imwrite(result_img_path, masked_image_ori)
     
     # convert to RGB
@@ -326,7 +327,7 @@ def color_region(image, mask, save_path, num_clusters):
 
     segmented_image_BRG = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
     #define result path for labeled images
-    result_img_path = save_path + 'clustered.png'
+    result_img_path = join(output_directory, f"{file_name}.clustered.png")
     cv2.imwrite(result_img_path, segmented_image_BRG)
 
 
@@ -404,7 +405,7 @@ def color_region(image, mask, save_path, num_clusters):
 
 
             result_BRG = cv2.cvtColor(result, cv2.COLOR_RGB2BGR)
-            result_img_path = save_path + 'result_' + str(cluster) + '.png'
+            result_img_path = join(output_directory, f"{file_name}.result.{cluster}.png")
             cv2.imwrite(result_img_path, result_BRG)
 
     '''
@@ -446,7 +447,7 @@ def color_region(image, mask, save_path, num_clusters):
     plt.pie(counts.values(), labels = hex_colors, colors = hex_colors)
 
     #define result path for labeled images
-    result_img_path = save_path + 'pie_color.png'
+    result_img_path = join(output_directory, f"{file_name}.pie_color.png")
     plt.savefig(result_img_path)
 
    

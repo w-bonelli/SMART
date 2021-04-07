@@ -19,11 +19,11 @@ The easiest way to run this project in a Unix environment is with [Docker](https
 ### Docker
 
 ```bash
-docker run -v "$(pwd)":/opt/arabidopsis-rosette-analysis -w /opt/arabidopsis-rosette-analysis computationalplantscience/arabidopsis-rosette-analysis python3 cli.py extract <file or directory>
+docker run -v $(pwd):/opt/code -w /opt/code computationalplantscience/arabidopsis-rosette-analysis python3 /opt/code/cli.py extract <file or directory> -o <output directory>
 ```
 
 ### Singularity
 
 ```bash
-singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 python3 cli.py extract <file or directory>
+singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 cli.py extract <file or directory> -o <output directory>
 ```

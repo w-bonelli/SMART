@@ -23,6 +23,7 @@ time python3 trait_extract_parallel.py -p ~/plant-image-analysis/test/ -ft jpg -
 import os
 import glob
 from os.path import join
+from typing import List
 
 import utils
 
@@ -67,6 +68,8 @@ from tabulate import tabulate
 
 import warnings
 
+from luminous_detection import isbright, write_results_to_csv
+from marker_roi_crop import circle_detect
 from options import ArabidopsisRosetteAnalysisOptions
 from results import ArabidopsisRosetteAnalysisResult
 
@@ -697,7 +700,7 @@ def get_cmap(n, name='hsv'):
     
     
 
-def color_region(image, mask, save_path, num_clusters):
+def color_region(image, mask, output_directory, file_name, num_clusters):
     
     # read the image
      #grab image width and height
@@ -707,7 +710,7 @@ def color_region(image, mask, save_path, num_clusters):
     masked_image_ori = cv2.bitwise_and(image, image, mask = mask)
     
     #define result path for labeled images
-    result_img_path = save_path + 'masked.png'
+    result_img_path = join(output_directory, f"{file_name}.masked.png")
     cv2.imwrite(result_img_path, masked_image_ori)
     
     # convert to RGB
@@ -741,7 +744,7 @@ def color_region(image, mask, save_path, num_clusters):
 
     segmented_image_BRG = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
     #define result path for labeled images
-    result_img_path = save_path + 'clustered.png'
+    result_img_path = join(output_directory, f"{file_name}.clustered.png")
     cv2.imwrite(result_img_path, segmented_image_BRG)
 
 
@@ -823,7 +826,7 @@ def color_region(image, mask, save_path, num_clusters):
 
 
             result_BRG = cv2.cvtColor(result, cv2.COLOR_RGB2BGR)
-            result_img_path = save_path + 'result_' + str(cluster) + '.png'
+            result_img_path = join(output_directory, f"{file_name}.result.{cluster}.png")
             cv2.imwrite(result_img_path, result_BRG)
 
 
@@ -861,7 +864,7 @@ def color_region(image, mask, save_path, num_clusters):
     plt.pie(counts.values(), labels = hex_colors, colors = hex_colors)
 
     #define result path for labeled images
-    result_img_path = save_path + 'pie_color.png'
+    result_img_path = join(output_directory, f"{file_name}.pie_color.png")
     plt.savefig(result_img_path)
 
    
@@ -1161,6 +1164,42 @@ def extract_traits(image_file):
     return image_file_name, area, solidity, max_width, max_height, avg_curv, n_leaves
 
 
+def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
+    left = None
+    right = None
+    i = 0
+    sorted_options = sorted(options, key=lambda o: o.timestamp)
+    for option in sorted_options:
+        img = cv2.imread(option.input_file)
+        img_name, mean_luminosity, luminosity_str = isbright(option)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
+        write_results_to_csv([(img_name, mean_luminosity, luminosity_str)], option.output_directory)
+        if luminosity_str == 'dark':
+            if left is None:
+                left = i
+            right = i
+        else:
+            if left is not None and left != right:
+                ii = 0
+                left_file = sorted_options[left].input_file
+                right_file = sorted_options[right].input_file
+                prev_file = sorted_options[left - 1].input_file
+                post_file = sorted_options[right + 1].input_file
+                print(f"Replacing {left_file} to {right_file} with merger of {prev_file} and {post_file}")
+                for opt in sorted_options[left:right + 1]:
+                    prev = cv2.imread(prev_file)
+                    post = cv2.imread(post_file)
+                    mask_proportion = ii / (right - left)
+                    print(f"Merging {prev_file} with {post_file} using mask value {mask_proportion}")
+                    mask = np.full(img.shape, mask_proportion)
+                    blended = cv2.addWeighted(prev, mask_proportion, post, 1 - mask_proportion, 0)
+                    cv2.imwrite(opt.input_file, blended)
+                    ii += 1
+                left = i
+                right = i
+        i += 1
+
+
+
 def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRosetteAnalysisResult:
     print(f"Exacting traits for image {options.input_name} using output directory {options.output_directory}")
 
@@ -1172,28 +1211,24 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     else:
         print("Segmenting plant object using automatic color clustering method... ")
 
-    image = cv2.imread(options.input_file)
-
-    # make backup image
-    orig = image.copy()
-
-    source_image = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)
-
     args_colorspace = 'lab'
     args_channels = '1'
     args_num_clusters = 2
 
-    # color clustering based plant object segmentation
-    thresh = color_cluster_seg(orig, args_colorspace, args_channels, args_num_clusters)
+    image = cv2.imread(options.input_file)
+    image_copy = image.copy()
 
-    # save segmentation result
-    result_file = join(options.output_directory, f"{options.input_stem}_seg{file_extension}")
-    cv2.imwrite(result_file, thresh)
+    # circle detection
+    _, circles = circle_detect(options)
+
+    # color clustering based plant object segmentation
+    segmented = color_cluster_seg(image_copy, args_colorspace, args_channels, args_num_clusters)
+    cv2.imwrite(join(options.output_directory, f"{options.input_stem}_seg{file_extension}"), segmented)
 
     num_clusters = 5
     # save color quantization result
     # rgb_colors = color_quantization(image, thresh, save_path, num_clusters)
-    rgb_colors = color_region(orig, thresh, options.output_directory + '/', num_clusters)
+    rgb_colors = color_region(image_copy, segmented, options.output_directory + '/', num_clusters)
 
     selected_color = rgb2lab(np.uint8(np.asarray([[rgb_colors[0]]])))
 
@@ -1217,11 +1252,11 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     # accquire medial axis of segmentation mask
     # image_medial_axis = medial_axis_image(thresh)
 
-    image_skeleton, skeleton = skeleton_bw(thresh)
+    image_skeleton, skeleton = skeleton_bw(segmented)
 
     # save _skeleton result
-    result_file = join(options.output_directory, f"{options.input_stem}_skeleton{file_extension}")
-    cv2.imwrite(result_file, img_as_ubyte(image_skeleton))
+    segmented = join(options.output_directory, f"{options.input_stem}_skeleton{file_extension}")
+    cv2.imwrite(segmented, img_as_ubyte(image_skeleton))
 
     ###
     # ['skeleton-id', 'node-id-src', 'node-id-dst', 'branch-distance',
@@ -1285,21 +1320,21 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     # plt.close()
 
     fig = plt.plot()
-    source_image = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)
+    source_image = cv2.cvtColor(image_copy, cv2.COLOR_BGR2RGB)
     # img_overlay = draw.overlay_euclidean_skeleton_2d(source_image, branch_data, skeleton_color_source = 'branch-distance', skeleton_colormap = 'hsv')
     img_overlay = draw.overlay_euclidean_skeleton_2d(source_image, branch_data, skeleton_color_source='branch-type', skeleton_colormap='hsv')
-    result_file = join(options.output_directory, f"{options.input_stem}_euclidean_graph_overlay{file_extension}")
-    plt.savefig(result_file, transparent=True, bbox_inches='tight', pad_inches=0)
+    segmented = join(options.output_directory, f"{options.input_stem}_euclidean_graph_overlay{file_extension}")
+    plt.savefig(segmented, transparent=True, bbox_inches='tight', pad_inches=0)
     plt.close()
 
     ############################################## leaf number computation
     min_distance_value = 20
     # watershed based leaf area segmentaiton
-    labels = watershed_seg(orig, thresh, min_distance_value)
+    labels = watershed_seg(image_copy, segmented, min_distance_value)
 
     # labels = watershed_seg_marker(orig, thresh, min_distance_value, img_marker)
 
-    individual_object_seg(orig, labels, options.output_directory + '/', options.input_stem, file_extension)
+    individual_object_seg(image_copy, labels, options.output_directory + '/', options.input_stem, file_extension)
 
     # save watershed result label image
     # Map component labels to hue val
@@ -1313,22 +1348,22 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
 
     # set background label to black
     labeled_img[label_hue == 0] = 0
-    result_file = join(options.output_directory, f"{options.input_stem}_label{file_extension}")
+    segmented = join(options.output_directory, f"{options.input_stem}_label{file_extension}")
     # plt.imsave(result_file, img_as_float(labels), cmap = "Spectral")
-    cv2.imwrite(result_file, labeled_img)
+    cv2.imwrite(segmented, labeled_img)
 
-    (avg_curv, label_trait) = compute_curv(orig, labels)
+    (avg_curv, label_trait) = compute_curv(image_copy, labels)
 
     # save watershed result label image
-    result_file = join(options.output_directory, f"{options.input_stem}_curv{file_extension}")
-    cv2.imwrite(result_file, label_trait)
+    segmented = join(options.output_directory, f"{options.input_stem}_curv{file_extension}")
+    cv2.imwrite(segmented, label_trait)
 
     # find external contour
-    (trait_img, area, solidity, max_width, max_height) = comp_external_contour(image.copy(), thresh)
+    (trait_img, area, solidity, max_width, max_height) = comp_external_contour(image.copy(), segmented)
     # save segmentation result
-    result_file = join(options.output_directory, f"{options.input_stem}_excontour{file_extension}")
+    segmented = join(options.output_directory, f"{options.input_stem}_excontour{file_extension}")
     # print(filename)
-    cv2.imwrite(result_file, trait_img)
+    cv2.imwrite(segmented, trait_img)
 
     n_leaves = int(len(np.unique(labels)) / 1 - 1)
 
