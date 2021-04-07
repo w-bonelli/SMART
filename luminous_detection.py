@@ -103,14 +103,11 @@ def write_results_to_csv(results, output_directory):
     headers = ['image_file_name', 'luminous_avg', 'dark_or_bright']
 
     with open(result_file, 'a+') as file:
-        char = file.read(1)
-        file.seek(0)
-        if not char:
-            writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        if os.stat(result_file).st_size == 0:
             writer.writerow(headers)
 
         for row in results:
-            writer = csv.writer(file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(row)
 
 
