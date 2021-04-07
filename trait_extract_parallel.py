@@ -982,13 +982,11 @@ def extract_traits(image_file):
         save_path = mkpath + '/'
 
     print ("results_folder: " + save_path)
-    
-    
+
+    print("Segmenting plant object using automatic color clustering method")
     if (file_size > 5.0):
-        print("It will take some time due to larger file size {0} MB".format(str(int(file_size))))
-    else:
-        print("Segmentaing plant object using automatic color clustering method... ")
-    
+        print(f"It may take some time due to large file size ({file_size} MB)")
+
     image = cv2.imread(image_file)
     
     #make backup image
@@ -1185,22 +1183,22 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
             right_file = sorted_options[right].input_file
             prev_file = sorted_options[left - 1].input_file
             next_file = sorted_options[right + 1].input_file
+            prev = cv2.imread(prev_file)
+            next = cv2.imread(next_file)
+            width = right - left + 1
+            offset = (1 / width)
             print(f"Replacing {left_file} to {right_file} with merger of {prev_file} and {next_file}")
             for opt in reversed(sorted_options[left:right + 1]):
-                prev = cv2.imread(prev_file)
-                next = cv2.imread(next_file)
-                width = right - left + 1
-                offset = (1 / width)
                 prev_weight = ((ii / (right - left)) * ((width - 1) / width)) + offset
                 next_weight = ((1 - prev_weight) * ((width - 1) / width)) + offset
-                print(f"Merging {prev_file} (weight {prev_weight}) with {next_file} (weight: {next_weight})")
+                print(f"Merging {prev_file} (weight {round(prev_weight, 2)}) with {next_file} (weight: {round(next_weight, 2)})")
                 blended = cv2.addWeighted(prev, prev_weight, next, next_weight, 0)
                 cv2.imwrite(opt.input_file, blended)
                 cv2.imwrite(join(opt.output_directory, f"{opt.input_stem}.blended.png"), blended)
                 ii += 1
             left = i
             right = i
-            replaced += 1
+            replaced += width
         i += 1
     print(f"Replaced {replaced} dark images with weighted blends of adjacent images")
     return any_dark
@@ -1212,10 +1210,9 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     _, file_extension = os.path.splitext(options.input_file)
     file_size = os.path.getsize(options.input_file) / MBFACTOR
 
+    print("Segmenting plant object using automatic color clustering method")
     if (file_size > 5.0):
-        print("It will take some time due to larger file size {0} MB".format(str(int(file_size))))
-    else:
-        print("Segmenting plant object using automatic color clustering method... ")
+        print(f"It may take some time due to large file size ({file_size} MB)")
 
     args_colorspace = 'lab'
     args_channels = '1'
@@ -1234,7 +1231,7 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     num_clusters = 5
     # save color quantization result
     # rgb_colors = color_quantization(image, thresh, save_path, num_clusters)
-    rgb_colors = color_region(image_copy, segmented, options.output_directory + '/', num_clusters)
+    rgb_colors = color_region(image_copy, segmented, options.output_directory + '/', options.input_stem, num_clusters)
 
     selected_color = rgb2lab(np.uint8(np.asarray([[rgb_colors[0]]])))
 
@@ -1261,8 +1258,7 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     image_skeleton, skeleton = skeleton_bw(segmented)
 
     # save _skeleton result
-    segmented = join(options.output_directory, f"{options.input_stem}_skeleton{file_extension}")
-    cv2.imwrite(segmented, img_as_ubyte(image_skeleton))
+    cv2.imwrite(join(options.output_directory, f"{options.input_stem}_skeleton{file_extension}"), img_as_ubyte(image_skeleton))
 
     ###
     # ['skeleton-id', 'node-id-src', 'node-id-dst', 'branch-distance',
@@ -1329,8 +1325,7 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     source_image = cv2.cvtColor(image_copy, cv2.COLOR_BGR2RGB)
     # img_overlay = draw.overlay_euclidean_skeleton_2d(source_image, branch_data, skeleton_color_source = 'branch-distance', skeleton_colormap = 'hsv')
     img_overlay = draw.overlay_euclidean_skeleton_2d(source_image, branch_data, skeleton_color_source='branch-type', skeleton_colormap='hsv')
-    segmented = join(options.output_directory, f"{options.input_stem}_euclidean_graph_overlay{file_extension}")
-    plt.savefig(segmented, transparent=True, bbox_inches='tight', pad_inches=0)
+    plt.savefig(join(options.output_directory, f"{options.input_stem}_euclidean_graph_overlay{file_extension}"), transparent=True, bbox_inches='tight', pad_inches=0)
     plt.close()
 
     ############################################## leaf number computation
@@ -1354,22 +1349,19 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
 
     # set background label to black
     labeled_img[label_hue == 0] = 0
-    segmented = join(options.output_directory, f"{options.input_stem}_label{file_extension}")
     # plt.imsave(result_file, img_as_float(labels), cmap = "Spectral")
-    cv2.imwrite(segmented, labeled_img)
+    cv2.imwrite(join(options.output_directory, f"{options.input_stem}_label{file_extension}"), labeled_img)
 
     (avg_curv, label_trait) = compute_curv(image_copy, labels)
 
     # save watershed result label image
-    segmented = join(options.output_directory, f"{options.input_stem}_curv{file_extension}")
-    cv2.imwrite(segmented, label_trait)
+    cv2.imwrite(join(options.output_directory, f"{options.input_stem}_curv{file_extension}"), label_trait)
 
     # find external contour
     (trait_img, area, solidity, max_width, max_height) = comp_external_contour(image.copy(), segmented)
     # save segmentation result
-    segmented = join(options.output_directory, f"{options.input_stem}_excontour{file_extension}")
     # print(filename)
-    cv2.imwrite(segmented, trait_img)
+    cv2.imwrite(join(options.output_directory, f"{options.input_stem}_excontour{file_extension}"), trait_img)
 
     n_leaves = int(len(np.unique(labels)) / 1 - 1)
 
