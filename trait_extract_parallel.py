@@ -1169,6 +1169,7 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
     right = None
     i = 0
     replaced = 0
+    any_dark = False
     sorted_options = sorted(options, key=lambda o: o.timestamp)
     for option in sorted_options:
         img_name, mean_luminosity, luminosity_str = isbright(option)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
@@ -1177,6 +1178,7 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
             if left is None:
                 left = i
             right = i
+            any_dark = True
         elif left is not None and left != right:
             ii = 0
             left_file = sorted_options[left].input_file
@@ -1201,6 +1203,7 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
             replaced += 1
         i += 1
     print(f"Replaced {replaced} dark images with weighted blends of adjacent images")
+    return any_dark
 
 
 def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRosetteAnalysisResult:

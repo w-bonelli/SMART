@@ -3,9 +3,9 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/arabidopsis-rosette-analysis
-commands: python3 /opt/code/cli.py extract "$INPUT" -o $(dirname $(dirname $INPUT))
+commands: python3 /opt/code/cli.py extract "$INPUT" -o $(dirname $INPUT)
 input:
-  kind: files
+  kind: directory
   path:
   filetypes:
     - jpg
@@ -19,7 +19,7 @@ output:
       - xlsx
 logo: rosette_logo.jpg
 resources:
-  time: "01:00:00"
+  time: "04:00:00"
   mem: "5GB"
   processes: 1
-  cores: 1
+  cores: 12

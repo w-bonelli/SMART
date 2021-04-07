@@ -25,6 +25,10 @@ def extract(source, output_directory, file_types):
 
     if Path(source).is_file():
         options = ArabidopsisRosetteAnalysisOptions(input_file=source, output_directory=output_directory)
+        print(f"Checking image quality")
+        if check_discard_merge([options]):
+            print(f"Image is too dark!")
+            return
         result = trait_extract(options)
         write_results(options.output_directory, [result])
     elif Path(source).is_dir():
