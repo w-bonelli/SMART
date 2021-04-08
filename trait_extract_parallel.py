@@ -22,6 +22,7 @@ time python3 trait_extract_parallel.py -p ~/plant-image-analysis/test/ -ft jpg -
 # import the necessary packages
 import os
 import glob
+import traceback
 from os.path import join
 from typing import List
 
@@ -546,21 +547,23 @@ def compute_curv(orig, labels):
         
         
         if len(c) >= 5 :
-            label_trait = cv2.drawContours(orig, [c], -1, (255, 0, 0), 2)
-            ellipse = cv2.fitEllipse(c)
-            label_trait = cv2.ellipse(orig,ellipse,(0,255,0),2)
-            
-            c_np = np.vstack(c).squeeze()
-            count+=1
-            
-            x = c_np[:,0]
-            y = c_np[:,1]
-            
-            comp_curv = ComputeCurvature(x, y)
-            curvature = comp_curv.fit(x, y)
-            
-            curv_sum = curv_sum + curvature
+            try:
+                label_trait = cv2.drawContours(orig, [c], -1, (255, 0, 0), 2)
+                ellipse = cv2.fitEllipse(c)
+                label_trait = cv2.ellipse(orig,ellipse,(0,255,0),2)
 
+                c_np = np.vstack(c).squeeze()
+                count+=1
+
+                x = c_np[:,0]
+                y = c_np[:,1]
+
+                comp_curv = ComputeCurvature(x, y)
+                curvature = comp_curv.fit(x, y)
+
+                curv_sum = curv_sum + curvature
+            except:
+                print(traceback.format_exc())
         else:
             # optional to "delete" the small contours
             label_trait = cv2.drawContours(orig, [c], -1, (0, 0, 255), 2)
