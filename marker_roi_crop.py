@@ -111,7 +111,7 @@ def circle_detect(options: ArabidopsisRosetteAnalysisOptions):
         # save segmentation result
         cv2.imwrite(join(options.output_directory, f"{options.input_stem}.cropped.png"), crop_img)
 
-    return options.input_name, (x, y)
+    return options.input_name, (x, y), crop_img
 
 
 if __name__ == '__main__':

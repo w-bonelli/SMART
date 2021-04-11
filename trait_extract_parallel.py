@@ -346,7 +346,7 @@ def watershed_seg(orig, thresh, min_distance_value):
     return labels
 
 
-def individual_object_seg(orig, labels, save_path, base_name, file_extension, leaf_images: bool = False):
+def individual_object_seg(orig, labels, save_path, base_name, file_extension, leaf_images: bool = True):
     (width, height, n_channel) = orig.shape
     
     for label in np.unique(labels):
@@ -1222,10 +1222,10 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     args_num_clusters = 2
 
     image = cv2.imread(options.input_file)
-    image_copy = image.copy()
 
     # circle detection
-    _, circles = circle_detect(options)
+    _, circles, cropped = circle_detect(options)
+    image_copy = cropped.copy()
 
     # color clustering based plant object segmentation
     segmented = color_cluster_seg(image_copy, args_colorspace, args_channels, args_num_clusters)
@@ -1361,7 +1361,7 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     cv2.imwrite(join(options.output_directory, f"{options.input_stem}_curv{file_extension}"), label_trait)
 
     # find external contour
-    (trait_img, area, solidity, max_width, max_height) = comp_external_contour(image.copy(), segmented)
+    (trait_img, area, solidity, max_width, max_height) = comp_external_contour(image_copy, segmented)
     # save segmentation result
     # print(filename)
     cv2.imwrite(join(options.output_directory, f"{options.input_stem}_excontour{file_extension}"), trait_img)
