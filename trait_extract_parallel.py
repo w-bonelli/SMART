@@ -1014,7 +1014,7 @@ def extract_traits(image_file):
     num_clusters = 5
     #save color quantization result
     #rgb_colors = color_quantization(image, thresh, save_path, num_clusters)
-    rgb_colors = color_region(orig, thresh, save_path, num_clusters)
+    rgb_colors = color_region(orig, thresh, save_path, filename, num_clusters)
     
     selected_color = rgb2lab(np.uint8(np.asarray([[rgb_colors[0]]])))
     
