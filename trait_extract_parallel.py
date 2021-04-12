@@ -1208,8 +1208,6 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
 
 
 def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRosetteAnalysisResult:
-    print(f"Exacting traits for image {options.input_name} using output directory {options.output_directory}")
-
     _, file_extension = os.path.splitext(options.input_file)
     file_size = os.path.getsize(options.input_file) / MBFACTOR
 
@@ -1224,8 +1222,8 @@ def trait_extract(options: ArabidopsisRosetteAnalysisOptions) -> ArabidopsisRose
     image = cv2.imread(options.input_file)
 
     # circle detection
-    _, circles, cropped = circle_detect(options)
-    image_copy = cropped.copy()
+    # _, circles, cropped = circle_detect(options)
+    image_copy = image.copy()
 
     # color clustering based plant object segmentation
     segmented = color_cluster_seg(image_copy, args_colorspace, args_channels, args_num_clusters)

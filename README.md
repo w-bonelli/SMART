@@ -18,6 +18,14 @@ The easiest way to run this project in a Unix environment is with [Docker](https
 
 ### Docker
 
+To pre-process images (luminosity detection, dark image replacement, cropping, and contrast adjustment), run:
+
+```bash
+docker run -v $(pwd):/opt/code -w /opt/code computationalplantscience/arabidopsis-rosette-analysis python3 /opt/code/cli.py preprocess <file or directory> -o <output directory>
+```
+
+To extract traits from images:
+
 ```bash
 docker run -v $(pwd):/opt/code -w /opt/code computationalplantscience/arabidopsis-rosette-analysis python3 /opt/code/cli.py extract <file or directory> -o <output directory>
 ```
@@ -25,6 +33,7 @@ docker run -v $(pwd):/opt/code -w /opt/code computationalplantscience/arabidopsi
 ### Singularity
 
 ```bash
+singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 cli.py preprocess <file or directory> -o <output directory>
 singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 cli.py extract <file or directory> -o <output directory>
 ```
 
