@@ -54,9 +54,19 @@ def preprocess(source, output_directory, file_types):
 
         for image in images:
             cropped = circle_detect(image.input_file)
-            # cv2.imwrite(f"{join(image.output_directory, image.input_stem)}.png", cropped)
-            enhanced = image_enhance(cropped)
-            enhanced.save(f"{join(image.output_directory, image.input_stem)}.png")
+
+            # img_hsv = cv2.cvtColor(cropped, cv2.COLOR_BGR2HSV)
+            # img_hsv[:, :, 2] = cv2.equalizeHist(img_hsv[:, :, 2])
+            # enhanced = cv2.cvtColor(img_hsv, cv2.COLOR_HSV2BGR)
+
+            img_hsv = cv2.cvtColor(cropped, cv2.COLOR_BGR2YUV)
+            img_hsv[:, :, 0] = cv2.equalizeHist(img_hsv[:, :, 0])
+            enhanced = cv2.cvtColor(img_hsv, cv2.COLOR_YUV2BGR)
+
+            cv2.imwrite(f"{join(image.output_directory, image.input_stem)}.png", enhanced)
+
+            # enhanced = image_enhance(cropped)
+            # enhanced.save(f"{join(image.output_directory, image.input_stem)}.png")
     else:
         print(f"File not found: {source}")
 
