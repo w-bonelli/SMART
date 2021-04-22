@@ -39,10 +39,10 @@ from tabulate import tabulate
 import openpyxl
 
 # Convert it to LAB color space to access the luminous channel which is independent of colors.
-from options import ArabidopsisRosetteAnalysisOptions
+from core.options import ImageInput
 
 
-def isbright(options: ArabidopsisRosetteAnalysisOptions):
+def isbright(options: ImageInput):
     print(f"Checking luminosity of {options.input_name}")
     # Set up threshold value for luminous channel, can be adjusted and generalized
     thresh = 0.5
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     # Accquire image file list
     imgList = sorted(glob.glob(image_file_path))
-    options = [ArabidopsisRosetteAnalysisOptions(input_file=file, output_directory=output_dir) for file in imgList]
+    options = [ImageInput(input_file=file, output_directory=output_dir) for file in imgList]
 
     # Get number of images in the data folder
     n_images = len(imgList)
@@ -274,7 +274,7 @@ def blend_image(left_image, right_image, left_weight, right_weight):
 
 
 # detect dark image and replac them with liner interpolated image
-def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
+def check_discard_merge(options: List[ImageInput], replace: bool = False):
     # create and assign index list for dark image
     idx_dark_imglist = [0] * len(options)
 
@@ -301,6 +301,7 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
 
     # find dark image index
     idx_dark = [i for i, x in enumerate(idx_dark_imglist) if x == -1]
+    idx_light = [i for i, x in enumerate(idx_dark_imglist) if x != -1]
 
     # print(idx_dark)
 
@@ -339,28 +340,81 @@ def check_discard_merge(options: List[ArabidopsisRosetteAnalysisOptions]):
 
             # print("current image idx:{0}, left_idx:{1}, right_idx:{2}, left_weight:{3}, right_weight:{4} \n".format(value, left_image_idx, right_image_idx, left_weight, right_weight))
 
-            blended = blend_image(options[left_image_idx], options[right_image_idx], left_weight, right_weight)
+            blended = blend_image(options[left_image_idx].input_file, options[right_image_idx].input_file, left_weight, right_weight)
 
-            print("blending current image:{0}, left:{1}, right:{2}, left_weight:{3:.2f}, right_weight:{4:.2f} \n".format(get_basename(options[value]),
-                                                                                                                         get_basename(
-                                                                                                                             options[left_image_idx]),
-                                                                                                                         get_basename(options[
-                                                                                                                                          right_image_idx]),
+            print("Blending image:{0}, left:{1}, right:{2}, left_weight:{3:.2f}, right_weight:{4:.2f}".format(options[value].input_stem,
+                                                                                                                         options[left_image_idx].input_stem,
+                                                                                                                         options[right_image_idx].input_stem,
                                                                                                                          left_weight, right_weight))
 
             # save result by overwriting original files
-            result_file = (options[value])
-            cv2.imwrite(result_file, blended)
+            # cv2.imwrite(options[value].input_file, blended)
 
             # save result into result folder for debugging
-            result_file = (save_path + get_basename(options[value]) + '.' + args['filetype'])
-            cv2.imwrite(result_file, blended)
+            cv2.imwrite(join(options[0].output_directory, options[value].input_file) if replace else f"{join(options[0].output_directory, options[value].input_stem)}.blended.png", blended)
+
+    for idx, value in enumerate(idx_light):
+        image = cv2.imread(options[value].input_file)
+        cv2.imwrite(join(options[0].output_directory, options[value].input_file) if replace else f"{join(options[0].output_directory, options[value].input_stem)}.png", image)
+
+
+
+def check_discard_merge2(options: List[ImageInput], replace: bool = False):
+    left = None
+    right = None
+    i = 0
+    replaced = 0
+    any_dark = False
+    sorted_options = sorted(options, key=lambda o: o.timestamp)
+    for option in sorted_options:
+        img_name, mean_luminosity, luminosity_str = isbright(option.input_file)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
+        write_results_to_csv([(img_name, mean_luminosity, luminosity_str)], option.output_directory)
+        if luminosity_str == 'dark':
+            print(f"{option.input_stem} is too dark, skipping")
+            any_dark = True
+            continue
+        else:
+            cv2.imwrite(
+                join(options[0].output_directory, option.input_file) if replace else f"{join(options[0].output_directory, option.input_stem)}.png",
+                cv2.imread(option.input_file))
+        # if luminosity_str == 'dark':
+        #     if left is None:
+        #         left = i
+        #     right = i
+        #     any_dark = True
+        # elif left is not None and left != right:
+        #     ii = 0
+        #     left_file = sorted_options[left].input_file
+        #     right_file = sorted_options[right].input_file
+        #     prev_file = sorted_options[left - 1].input_file
+        #     next_file = sorted_options[right + 1].input_file
+        #     prev = cv2.imread(prev_file)
+        #     next = cv2.imread(next_file)
+        #     width = right - left + 1
+        #     offset = (1 / width)
+        #     print(f"Replacing {left_file} to {right_file} with merger of {prev_file} and {next_file}")
+        #     for opt in reversed(sorted_options[left:right + 1]):
+        #         prev_weight = ((ii / (right - left)) * ((width - 1) / width)) + offset
+        #         next_weight = ((1 - prev_weight) * ((width - 1) / width)) + offset
+        #         print(f"Merging {prev_file} (weight {round(prev_weight, 2)}) with {next_file} (weight: {round(next_weight, 2)})")
+        #         blended = cv2.addWeighted(prev, prev_weight, next, next_weight, 0)
+        #         # cv2.imwrite(opt.input_file, blended)
+        #         cv2.imwrite(join(options[0].output_directory, opt.input_file) if replace else f"{join(options[0].output_directory, opt.input_stem)}.blended.png", blended)
+        #         ii += 1
+        #     left = None
+        #     right = None
+        #     replaced += width
+        # else:
+        #     cv2.imwrite(join(options[0].output_directory, option.input_file) if replace else f"{join(options[0].output_directory, option.input_stem)}.png", cv2.imread(option.input_file))
+        # i += 1
+    # print(f"Replaced {replaced} dark images with weighted blends of adjacent images")
+    return any_dark
 
 
 # Detect circles in the image
-def circle_detect(image_path):
+def circle_detect(image_path, template_path):
     print(f"Cropping {image_path}")
-    template = cv2.imread(TEMPLATE_PATH, 0)
+    template = cv2.imread(template_path, 0)
 
     # load the image, clone it for output, and then convert it to grayscale
     img_ori = cv2.imread(image_path)

@@ -39,7 +39,7 @@ import openpyxl
 from pathlib import Path
 
 # generate foloder to store the output results
-from options import ArabidopsisRosetteAnalysisOptions
+from options import ImageInput
 
 
 TEMPLATE_PATH = "/opt/arabidopsis-rosette-analysis/marker_template/template.png"
@@ -70,7 +70,7 @@ def mkdir(path):
         return False
 
 
-def circle_detect(options: ArabidopsisRosetteAnalysisOptions):
+def circle_detect(options: ImageInput):
     # load the image, clone it for output, and then convert it to grayscale
     img_ori = cv2.imread(options.input_file)
     img_rgb = img_ori.copy()
@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
     # Accquire image file list
     imgList = sorted(glob.glob(image_file_path))
-    options = [ArabidopsisRosetteAnalysisOptions(input_file=file, output_directory=output_dir) for file in imgList]
+    options = [ImageInput(input_file=file, output_directory=output_dir) for file in imgList]
 
     # Read the template
     template = cv2.imread(TEMPLATE_PATH, 0)

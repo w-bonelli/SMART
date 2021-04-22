@@ -17,12 +17,10 @@ RUN apt-get update && \
     libxrender1
 
 RUN pip3 install --upgrade pip && \
-    pip3 install -r /opt/arabidopsis-rosette-analysis/requirements.txt 
-
-RUN chmod -R a+rwx /opt/arabidopsis-rosette-analysis/
+    pip3 install arabidopsis-rosette-analysis
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
-ENV PYTHONPATH=/opt/arabidopsis-rosette-analysis/
-ENV LD_LIBRARY_PATH=/opt/arabidopsis-rosette-analysis/
+# ENV PYTHONPATH=/opt/arabidopsis-rosette-analysis/
+# ENV LD_LIBRARY_PATH=/opt/arabidopsis-rosette-analysis/
 

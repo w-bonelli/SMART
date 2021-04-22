@@ -3,7 +3,7 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/arabidopsis-rosette-analysis
-commands: python3 /opt/arabidopsis-rosette-analysis/cli.py extract "$INPUT" -o $(dirname $INPUT)
+commands: arabidopsis luminosity "$INPUT" -o $(dirname $INPUT) && arabidopsis crop $(dirname $INPUT) -o $(dirname $INPUT) -t /opt/arabidopsis-rosette-analysis/marker_template.png -r && arabidopsis extract $(dirname $INPUT) -o $(dirname $INPUT)
 input:
   kind: directory
   path:
@@ -17,7 +17,7 @@ output:
       - png
       - csv
       - xlsx
-logo: rosette_logo.jpg
+logo: rosette.jpg
 resources:
   time: "04:00:00"
   mem: "5GB"

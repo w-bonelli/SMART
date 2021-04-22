@@ -25,12 +25,12 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 from tabulate import tabulate
 
-from results import ArabidopsisRosetteAnalysisResult
+from core.results import ArabidopsisRosetteAnalysisResult
 
 
 def write_results(output_directory: str, results: List[ArabidopsisRosetteAnalysisResult]):
-    headers = ['filename', 'area', 'solidity', 'max_width', 'max_height', 'avg_curv', 'n_leaves']
-    results = [(result.id, result.area, result.solidity, result.max_width, result.max_height, result.avg_curve, result.n_leaves) for result in results]
+    headers = ['filename', 'failed', 'area', 'solidity', 'max_width', 'max_height', 'avg_curv', 'n_leaves']
+    results = [(result.id, result.failed, result.area, result.solidity, result.max_width, result.max_height, result.avg_curve, result.n_leaves) for result in results]
     table = tabulate(results, headers=headers, tablefmt='orgtbl')
     print(table)
 

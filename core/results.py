@@ -1,6 +1,8 @@
 class ArabidopsisRosetteAnalysisResult:
     def __init__(
-            self, id: str,
+            self,
+            id: str,
+            failed: bool = False,
             area: float = None,
             solidity: float = None,
             max_width: int = None,
@@ -8,6 +10,7 @@ class ArabidopsisRosetteAnalysisResult:
             avg_curve: float = None,
             n_leaves: int = None):
         self.id = id
+        self.failed = failed
         self.area = area
         self.solidity = solidity
         self.max_width = max_width
