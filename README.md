@@ -3,12 +3,23 @@
 Author: Suxing Liu
 
 ![CI](https://github.com/Computational-Plant-Science/arabidopsis-rosette-analysis/workflows/CI/badge.svg)
+[![PyPI version](https://badge.fury.io/py/arabidopsis-rosette-analysis.svg)](https://badge.fury.io/py/arabidopsis-rosette-analysis)
 
 Robust and parameter-free plant image segmentation and trait extraction.
 
 1. Process with plant image top view, including whole tray plant image, this tool will segment it into individual images.
 2. Robust segmentation based on parameter-free color clustering method.
 3. Extract individual plant gemetrical traits, and write output into excel file.
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Contents**
+
+- [Requirements](#requirements)
+- [Usage](#usage)
+  - [Multiprocessing](#multiprocessing)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Requirements
 
