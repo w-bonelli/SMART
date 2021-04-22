@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='arabidopsis-rosette-analysis',
-    version='0.3.2',
+    version='0.3.3',
     description='Extract traits from top-view images of Arabidopsis plants. ',
     long_description=long_description,
     long_description_content_type="text/markdown",
