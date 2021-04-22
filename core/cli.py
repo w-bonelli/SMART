@@ -5,7 +5,7 @@ from os.path import join
 from pathlib import Path
 
 import click
-from cv2 import cv2
+import cv2
 
 from core.luminous_detection import circle_detect, image_enhance, check_discard_merge, check_discard_merge2
 from core.options import ImageInput
