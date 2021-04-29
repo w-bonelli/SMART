@@ -23,13 +23,14 @@ def cli():
 @click.option('-o', '--output_directory', required=False, type=str, default='')
 @click.option('-ft', '--file_types', required=False, type=str, default='jpg,png')
 @click.option('-r', '--replace', is_flag=True)
-def luminosity(source, output_directory, file_types, replace):
+@click.option('-t', '--threshold', required=False, type=float, default=0.8)
+def luminosity(source, output_directory, file_types, replace, threshold):
     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
     if Path(source).is_file():
         image = ImageInput(input_file=source, output_directory=output_directory)
         print(f"Checking image quality")
-        if check_discard_merge([image], replace):
+        if check_discard_merge2([image], replace, threshold):
             print(f"{source} is too dark!")
         else:
             print(f"{source} is light enough.")
@@ -44,7 +45,7 @@ def luminosity(source, output_directory, file_types, replace):
         files = sum((sorted(glob(join(source, f"*.{file_type}"))) for file_type in patterns), [])
         images = [ImageInput(input_file=file, output_directory=output_directory) for file in files]
         print(f"Found {len(files)} files with extensions {', '.join(patterns)}: \n" + '\n'.join(files))
-        check_discard_merge2(images, replace)
+        check_discard_merge2(images, replace, threshold)
     else:
         print(f"Path does not exist: {source}")
 

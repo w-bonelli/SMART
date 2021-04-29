@@ -42,10 +42,9 @@ import openpyxl
 from core.options import ImageInput
 
 
-def isbright(options: ImageInput):
+def isbright(options: ImageInput, threshold: float):
     print(f"Checking luminosity of {options.input_name}")
     # Set up threshold value for luminous channel, can be adjusted and generalized
-    thresh = 0.5
 
     # Load image file 
     orig = cv2.imread(options.input_file)
@@ -58,12 +57,12 @@ def isbright(options: ImageInput):
     normalized = np.mean(L / np.max(L))
 
     # Normalize L channel by dividing all pixel values with maximum pixel value
-    if normalized < thresh:
+    if normalized < threshold:
         text_bool = "bright"
         print(f"Image {options.input_stem} is light enough ({normalized})")
     else:
         text_bool = "dark"
-        print(f"Image {options.input_stem} is dark ({normalized} over threshold {thresh})")
+        print(f"Image {options.input_stem} is dark ({normalized} over threshold {threshold})")
 
         # clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(3, 3))
         # cl = clahe.apply(L)
@@ -274,14 +273,14 @@ def blend_image(left_image, right_image, left_weight, right_weight):
 
 
 # detect dark image and replac them with liner interpolated image
-def check_discard_merge(options: List[ImageInput], replace: bool = False):
+def check_discard_merge(options: List[ImageInput], replace: bool = False, threshold: float = 0.8):
     # create and assign index list for dark image
     idx_dark_imglist = [0] * len(options)
 
     result_list = []
 
     for idx, image in enumerate(options):
-        img_name, mean_luminosity, luminosity_str = isbright(image.input_file)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
+        img_name, mean_luminosity, luminosity_str = isbright(image.input_file, threshold)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
         result_list.append([img_name, mean_luminosity, luminosity_str])
         idx_dark_imglist[idx] = -1 if luminosity_str == 'dark' else (idx)
 
@@ -359,15 +358,15 @@ def check_discard_merge(options: List[ImageInput], replace: bool = False):
 
 
 
-def check_discard_merge2(options: List[ImageInput], replace: bool = False):
+def check_discard_merge2(options: List[ImageInput], replace: bool = False, threshold: float = 0.8):
     left = None
     right = None
     i = 0
     replaced = 0
     any_dark = False
-    sorted_options = sorted(options, key=lambda o: o.timestamp)
-    for option in sorted_options:
-        img_name, mean_luminosity, luminosity_str = isbright(option.input_file)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
+    # sorted_options = sorted(options, key=lambda o: o.timestamp)
+    for option in options:
+        img_name, mean_luminosity, luminosity_str = isbright(option.input_file, threshold)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
         write_results_to_csv([(img_name, mean_luminosity, luminosity_str)], option.output_directory)
         if luminosity_str == 'dark':
             print(f"{option.input_stem} is too dark, skipping")
