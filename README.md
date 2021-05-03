@@ -1,4 +1,4 @@
-# Arabidopsis Rosette Analysis
+# Smart plant growth
 
 Author: Suxing Liu
 
