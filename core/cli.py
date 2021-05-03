@@ -23,7 +23,7 @@ def cli():
 @click.option('-o', '--output_directory', required=False, type=str, default='')
 @click.option('-ft', '--file_types', required=False, type=str, default='jpg,png')
 @click.option('-r', '--replace', is_flag=True)
-@click.option('-t', '--threshold', required=False, type=float, default=0.8)
+@click.option('-t', '--threshold', required=False, type=float, default=0.1)
 def luminosity(source, output_directory, file_types, replace, threshold):
     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
@@ -125,7 +125,10 @@ def crop(source, output_directory, file_types, template, replace):
 
         for input in inputs:
             cropped = circle_detect(input.input_file, template)
-            cv2.imwrite(get_path(input), cropped)
+            if cropped.size == 0:
+                print(f"No circle found, nothing to crop")
+            else:
+                cv2.imwrite(get_path(input), cropped)
     else:
         print(f"Path does not exist: {source}")
 

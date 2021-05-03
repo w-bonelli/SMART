@@ -18,5 +18,7 @@ class ImageInput:
             minute = int(splt[5])
             second = int(splt[6].split('_')[0])
             self.timestamp = datetime(year, month, day, hour=hour, minute=minute, second=second)
+            print(f"Parsed timestamp {self.timestamp} from filename: {self.input_name}")
         except:
-            pass
+            self.timestamp = None
+            print(f"No timestamp in filename: {self.input_name}")

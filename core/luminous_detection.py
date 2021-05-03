@@ -43,10 +43,7 @@ from core.options import ImageInput
 
 
 def isbright(options: ImageInput, threshold: float):
-    print(f"Checking luminosity of {options.input_name}")
-    # Set up threshold value for luminous channel, can be adjusted and generalized
-
-    # Load image file 
+    # Load image file
     orig = cv2.imread(options.input_file)
 
     # Make backup image
@@ -57,12 +54,12 @@ def isbright(options: ImageInput, threshold: float):
     normalized = np.mean(L / np.max(L))
 
     # Normalize L channel by dividing all pixel values with maximum pixel value
-    if normalized < threshold:
+    if normalized > threshold:
         text_bool = "bright"
-        print(f"Image {options.input_stem} is light enough ({normalized})")
+        print(f"Image {options.input_stem} is light enough (normalized luminosity {normalized})")
     else:
         text_bool = "dark"
-        print(f"Image {options.input_stem} is dark ({normalized} over threshold {threshold})")
+        print(f"Image {options.input_stem} is dark (normalized luminosity {normalized} under threshold {threshold})")
 
         # clahe = cv2.createCLAHE(clipLimit=8.0, tileGridSize=(3, 3))
         # cl = clahe.apply(L)
@@ -173,7 +170,6 @@ from PIL import Image, ImageEnhance
 
 import itertools
 
-
 TEMPLATE_PATH = "/opt/arabidopsis-rosette-analysis/marker_template/template.png"
 
 
@@ -217,33 +213,33 @@ def get_basename(image_file):
 
 
 # Convert it to LAB color space to access the luminous channel which is independent of colors.
-def isbright(image_file):
-    # Set up threshold value for luminous channel, can be adjusted and generalized
-    thresh = 0.5
-
-    # Load image file
-    orig = cv2.imread(image_file)
-
-    # Make backup image
-    image = orig.copy()
-
-    # Get file name
-    # abs_path = os.path.abspath(image_file)
-
-    # filename, file_extension = os.path.splitext(abs_path)
-    # base_name = os.path.splitext(os.path.basename(filename))[0]
-
-    image_file_name = Path(image_file).name
-
-    # Convert color space to LAB format and extract L channel
-    L, A, B = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2LAB))
-
-    # Normalize L channel by dividing all pixel values with maximum pixel value
-    L = L / np.max(L)
-
-    text_bool = "bright" if np.mean(L) < thresh else "dark"
-
-    return image_file_name, np.mean(L), text_bool
+# def isbright(image_file):
+#     # Set up threshold value for luminous channel, can be adjusted and generalized
+#     thresh = 0.5
+#
+#     # Load image file
+#     orig = cv2.imread(image_file)
+#
+#     # Make backup image
+#     image = orig.copy()
+#
+#     # Get file name
+#     # abs_path = os.path.abspath(image_file)
+#
+#     # filename, file_extension = os.path.splitext(abs_path)
+#     # base_name = os.path.splitext(os.path.basename(filename))[0]
+#
+#     image_file_name = Path(image_file).name
+#
+#     # Convert color space to LAB format and extract L channel
+#     L, A, B = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2LAB))
+#
+#     # Normalize L channel by dividing all pixel values with maximum pixel value
+#     L = L / np.max(L)
+#
+#     text_bool = "bright" if np.mean(L) < thresh else "dark"
+#
+#     return image_file_name, np.mean(L), text_bool
 
 
 # get weight value based on liner interpolation
@@ -273,14 +269,15 @@ def blend_image(left_image, right_image, left_weight, right_weight):
 
 
 # detect dark image and replac them with liner interpolated image
-def check_discard_merge(options: List[ImageInput], replace: bool = False, threshold: float = 0.8):
+def check_discard_merge(options: List[ImageInput], replace: bool = False, threshold: float = 0.1):
     # create and assign index list for dark image
     idx_dark_imglist = [0] * len(options)
 
     result_list = []
 
     for idx, image in enumerate(options):
-        img_name, mean_luminosity, luminosity_str = isbright(image.input_file, threshold)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
+        img_name, mean_luminosity, luminosity_str = isbright(image.input_file,
+                                                             threshold)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
         result_list.append([img_name, mean_luminosity, luminosity_str])
         idx_dark_imglist[idx] = -1 if luminosity_str == 'dark' else (idx)
 
@@ -342,31 +339,37 @@ def check_discard_merge(options: List[ImageInput], replace: bool = False, thresh
             blended = blend_image(options[left_image_idx].input_file, options[right_image_idx].input_file, left_weight, right_weight)
 
             print("Blending image:{0}, left:{1}, right:{2}, left_weight:{3:.2f}, right_weight:{4:.2f}".format(options[value].input_stem,
-                                                                                                                         options[left_image_idx].input_stem,
-                                                                                                                         options[right_image_idx].input_stem,
-                                                                                                                         left_weight, right_weight))
+                                                                                                              options[left_image_idx].input_stem,
+                                                                                                              options[right_image_idx].input_stem,
+                                                                                                              left_weight, right_weight))
 
             # save result by overwriting original files
             # cv2.imwrite(options[value].input_file, blended)
 
             # save result into result folder for debugging
-            cv2.imwrite(join(options[0].output_directory, options[value].input_file) if replace else f"{join(options[0].output_directory, options[value].input_stem)}.blended.png", blended)
+            cv2.imwrite(join(options[0].output_directory,
+                             options[value].input_file) if replace else f"{join(options[0].output_directory, options[value].input_stem)}.blended.png",
+                        blended)
 
     for idx, value in enumerate(idx_light):
         image = cv2.imread(options[value].input_file)
-        cv2.imwrite(join(options[0].output_directory, options[value].input_file) if replace else f"{join(options[0].output_directory, options[value].input_stem)}.png", image)
+        cv2.imwrite(join(options[0].output_directory,
+                         options[value].input_file) if replace else f"{join(options[0].output_directory, options[value].input_stem)}.png", image)
 
 
-
-def check_discard_merge2(options: List[ImageInput], replace: bool = False, threshold: float = 0.8):
+def check_discard_merge2(options: List[ImageInput], replace: bool = False, threshold: float = 0.1):
     left = None
     right = None
     i = 0
     replaced = 0
     any_dark = False
-    # sorted_options = sorted(options, key=lambda o: o.timestamp)
+
+    # if every image has timestamp data, sort images by timestamp
+    if all(option.timestamp is not None for option in options):
+        options = sorted(options, key=lambda o: o.timestamp)
+
     for option in options:
-        img_name, mean_luminosity, luminosity_str = isbright(option.input_file, threshold)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
+        img_name, mean_luminosity, luminosity_str = isbright(option, threshold)  # luminosity detection, luminosity_str is either 'dark' or 'bright'
         write_results_to_csv([(img_name, mean_luminosity, luminosity_str)], option.output_directory)
         if luminosity_str == 'dark':
             print(f"{option.input_stem} is too dark, skipping")
@@ -412,7 +415,7 @@ def check_discard_merge2(options: List[ImageInput], replace: bool = False, thres
 
 # Detect circles in the image
 def circle_detect(image_path, template_path):
-    print(f"Cropping {image_path}")
+    print(f"Checking for circle to crop in {image_path}")
     template = cv2.imread(template_path, 0)
 
     # load the image, clone it for output, and then convert it to grayscale
