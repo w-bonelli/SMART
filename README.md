@@ -27,9 +27,9 @@ Robust and parameter-free plant image segmentation and trait extraction.
 
 The easiest way to run this project in a Unix environment is with [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/).
 
-For instance, to pull the `computationalplantscience/spg-topdown-traits` image, mount the current working directory, and open a shell:
+For instance, to pull the `computationalplantscience/spg` image, mount the current working directory, and open a shell:
 
-`docker run -it -v $(pwd):/opt/dev -w /opt/dev computationalplantscience/spg-topdown-traits bash`
+`docker run -it -v $(pwd):/opt/dev -w /opt/dev computationalplantscience/spg bash`
 
 Singularity users:
 
