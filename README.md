@@ -11,6 +11,8 @@ Robust and parameter-free plant image segmentation and trait extraction.
 2. Robust segmentation based on parameter-free color clustering method.
 3. Extract individual plant gemetrical traits, and write output into excel file.
 
+![Optional Text](../master/media/image_01.png)
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Contents**
