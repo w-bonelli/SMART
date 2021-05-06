@@ -3,7 +3,7 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/spg
-commands: spg extract $(dirname $INPUT) -o $(dirname $INPUT) -l 0.1 -t /opt/arabidopsis-rosette-analysis/marker_template.png -m
+commands: spg extract $(dirname $INPUT) -o $(dirname $INPUT) -l 0.1 -t /opt/spg-topdown-traits/marker_template.png -m
 input:
   kind: directory
   path:
