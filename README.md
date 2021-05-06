@@ -27,34 +27,32 @@ Robust and parameter-free plant image segmentation and trait extraction.
 
 The easiest way to run this project in a Unix environment is with [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/).
 
-Pull the `computationalplantscience/arabidopsis-rosette-analysis` image and open a shell with:
+For instance, to pull the `computationalplantscience/spg-topdown-traits` image, mount the current working directory, and open a shell:
 
-`docker run -it computationalplantscience/arabidopsis-rosette-analysis bash`
+`docker run -it -v $(pwd):/opt/dev -w /opt/dev computationalplantscience/spg-topdown-traits bash`
 
 Singularity users:
 
-`singularity shell docker://computationalplantscience/arabidopsis-rosette-analysis`
+`singularity shell docker://computationalplantscience/spg-topdown-traits`
 
 ## Usage
 
-There are several commands available:
+A typical use case might look like:
 
-- `luminosity`: verify that images are bright enough for feature extraction
-- `enhance`: apply contrast enhancement (sometimes helpful for blurry images)
-- `crop`: locate rosette and crop image to fit
-- `extract`: extract trait measurements
+`spg extract <input directory> -o <output directory> -l 0.1 -t /opt/spg-topdown-traits/marker_template.png -m`
 
-A typical workflow might look like:
+#### Output directory
 
-```shell
-arabidopsis luminosity <data directory> -o <output directory>     # move files bright enough to analyze to a new directory
-arabidopsis enhance <output directory> -o <output directory> -r   # contrast enhancement (modify files in-place)
-arabidopsis crop <output directory> -o <output directory> -r      # crop to rosette (modify files in-place)
-arabidopsis extract <output directory> -o <output directory>      # analyze the image and compute traits
-```
+By default, output files will be written to the current working directory. To provide a different path, use the `-o` option.
 
-You must provide a marker template image to use the `crop` command. By default, an image named `marker_template.png` is expected in the working directory. You can also provide a different image path with the `-t (--template)` argument. A template is provided in the Docker image at `/opt/arabidopsis-rosette-analysis/marker_template.png`.
+#### Luminosity threshold
 
-### Multiprocessing
+The `-l 0.1` option sets a luminosity threshold of 10%. Images darker than this will not be processed.
+
+#### Marker template
+
+You must provide a marker template image to use `spg-topdown-traits`. By default, an image named `marker_template.png` is expected in the working directory. You can also provide a different image path with the `-t (--template)` argument. A template is provided in the Docker image at `/opt/arabidopsis-rosette-analysis/marker_template.png`.
+
+#### Multiprocessing
 
 To allow the `extract` command to process images in parallel if multiple cores are available, use the `-m` flag.

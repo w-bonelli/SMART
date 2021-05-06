@@ -10,10 +10,10 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: plantit-dev
-          SLACK_ICON: https://raw.githubusercontent.com/Computational-Plant-Science/arabidopsis-rosette-analysis/master/rosette_logo.jpg
+          SLACK_ICON: https://raw.githubusercontent.com/Computational-Plant-Science/spg-topdown-traits/master/rosette_logo.jpg
           SLACK_MESSAGE: 'Build started'
-          SLACK_TITLE: Arabidopsis Rosette Analysis
-          SLACK_USERNAME: arabidopsis-rosette-analysis
+          SLACK_TITLE: "Smart Plant Growth: Top-Down Traits"
+          SLACK_USERNAME: spg-topdown-traits
   publish:
     runs-on: ubuntu-latest
     strategy:
@@ -46,14 +46,14 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build & publish container
         run: |
-          docker build -t computationalplantscience/arabidopsis-rosette-analysis -f Dockerfile .
-          docker push computationalplantscience/arabidopsis-rosette-analysis
+          docker build -t computationalplantscience/spg -f Dockerfile .
+          docker push computationalplantscience/spg
       - name: Slack success notification
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: plantit-dev
-          SLACK_ICON: https://raw.githubusercontent.com/Computational-Plant-Science/arabidopsis-rosette-analysis/master/rosette_logo.jpg
+          SLACK_ICON: https://raw.githubusercontent.com/Computational-Plant-Science/spg-topdown-traits/master/rosette_logo.jpg
           SLACK_MESSAGE: 'Build succeeded'
-          SLACK_TITLE: Arabidopsis Rosette Analysis
-          SLACK_USERNAME: arabidopsis-rosette-analysis
+          SLACK_TITLE: 'Smart Plant Growth: Top-Down Traits'
+          SLACK_USERNAME: spg-topdown-traits

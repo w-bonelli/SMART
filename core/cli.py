@@ -23,38 +23,6 @@ def cli():
 @click.option('-o', '--output_directory', required=False, type=str, default='')
 @click.option('-ft', '--file_types', required=False, type=str, default='jpg,png')
 @click.option('-r', '--replace', is_flag=True)
-@click.option('-t', '--threshold', required=False, type=float, default=0.1)
-def luminosity(source, output_directory, file_types, replace, threshold):
-    Path(output_directory).mkdir(parents=True, exist_ok=True)
-
-    if Path(source).is_file():
-        image = ImageInput(input_file=source, output_directory=output_directory)
-        print(f"Checking image quality")
-        if check_discard_merge2([image], replace, threshold):
-            print(f"{source} is too dark!")
-        else:
-            print(f"{source} is light enough.")
-    elif Path(source).is_dir():
-        patterns = [ft.lower() for ft in file_types.split(',')]
-        if 'jpg' in patterns:
-            patterns.append('jpeg')
-        if len(patterns) == 0:
-            raise ValueError(f"You must specify file types!")
-
-        patterns = patterns + [pattern.upper() for pattern in patterns]
-        files = sum((sorted(glob(join(source, f"*.{file_type}"))) for file_type in patterns), [])
-        images = [ImageInput(input_file=file, output_directory=output_directory) for file in files]
-        print(f"Found {len(files)} files with extensions {', '.join(patterns)}: \n" + '\n'.join(files))
-        check_discard_merge2(images, replace, threshold)
-    else:
-        print(f"Path does not exist: {source}")
-
-
-@cli.command()
-@click.argument('source')
-@click.option('-o', '--output_directory', required=False, type=str, default='')
-@click.option('-ft', '--file_types', required=False, type=str, default='jpg,png')
-@click.option('-r', '--replace', is_flag=True)
 def enhance(source, output_directory, file_types, replace):
     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
@@ -98,52 +66,29 @@ def enhance(source, output_directory, file_types, replace):
 @click.argument('source')
 @click.option('-o', '--output_directory', required=False, type=str, default='')
 @click.option('-ft', '--file_types', required=False, type=str, default='jpg,png')
+@click.option('-l', '--luminosity_threshold', required=False, type=float, default=0.1)
 @click.option('-t', '--template', required=False, type=str, default='marker_template.png')
-@click.option('-r', '--replace', is_flag=True)
-def crop(source, output_directory, file_types, template, replace):
+@click.option('-m', '--multiprocessing', is_flag=True)
+def extract(source, output_directory, file_types, luminosity_threshold, template, multiprocessing):
     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
-    get_path = lambda i: f"{join(i.output_directory, i.input_stem)}.png" if replace else f"{join(i.output_directory, i.input_stem)}.cropped.png"
-
     if Path(source).is_file():
-        input = ImageInput(input_file=source, output_directory=output_directory)
+        # check luminosity
+        image = ImageInput(input_file=source, output_directory=output_directory)
+        print(f"Checking image quality")
+        if check_discard_merge2([image], luminosity_threshold):
+            print(f"{source} is too dark!")
+        else:
+            print(f"{source} is light enough.")
+
+        # crop
+        input = ImageInput(input_file=join(output_directory, Path(source).name), output_directory=output_directory)
         cropped = circle_detect(input.input_file, template)
         enhanced = image_enhance(cropped)
-        enhanced.save(get_path(input))
+        enhanced.save(f"{join(input.output_directory, input.input_stem)}.png")
 
-    elif Path(source).is_dir():
-        patterns = [ft.lower() for ft in file_types.split(',')]
-        if 'jpg' in patterns:
-            patterns.append('jpeg')
-        if len(patterns) == 0:
-            raise ValueError(f"You must specify file types!")
-
-        patterns = patterns + [pattern.upper() for pattern in patterns]
-        files = sum((sorted(glob(join(source, f"*.{file_type}"))) for file_type in patterns), [])
-        inputs = [ImageInput(input_file=file, output_directory=output_directory) for file in files]
-        print(f"Found {len(files)} files with extensions {', '.join(patterns)}: \n" + '\n'.join(files))
-
-        for input in inputs:
-            cropped = circle_detect(input.input_file, template)
-            if cropped.size == 0:
-                print(f"No circle found, nothing to crop")
-            else:
-                cv2.imwrite(get_path(input), cropped)
-    else:
-        print(f"Path does not exist: {source}")
-
-
-@cli.command()
-@click.argument('source')
-@click.option('-o', '--output_directory', required=False, type=str, default='')
-@click.option('-ft', '--file_types', required=False, type=str, default='jpg,png')
-@click.option('-m', '--multiprocessing', is_flag=True)
-def extract(source, output_directory, file_types, multiprocessing):
-    Path(output_directory).mkdir(parents=True, exist_ok=True)
-
-    if Path(source).is_file():
-        print('=====')
-        image = ImageInput(input_file=source, output_directory=output_directory)
+        # extract traits
+        image = ImageInput(input_file=join(output_directory, Path(source).name), output_directory=output_directory)
         result = trait_extract(image)
         write_results(image.output_directory, [result])
     elif Path(source).is_dir():
@@ -158,6 +103,21 @@ def extract(source, output_directory, file_types, multiprocessing):
         images = [ImageInput(input_file=file, output_directory=output_directory) for file in files]
         print(f"Found {len(files)} files with extensions {', '.join(patterns)}: \n" + '\n'.join(files))
 
+        # check luminosity
+        check_discard_merge2(images, luminosity_threshold)
+
+        # manipulate images in the output directory from here on
+        images = [ImageInput(input_file=join(output_directory, Path(file).name), output_directory=output_directory) for file in files]
+
+        # crop
+        for input in images:
+            cropped = circle_detect(input.input_file, template)
+            if cropped.size == 0:
+                print(f"No circle found, nothing to crop")
+            else:
+                cv2.imwrite(f"{join(input.output_directory, input.input_stem)}.png", cropped)
+
+        # extract traits
         if multiprocessing:
             processes = cpu_count()
             print(f"Using up to {processes} processes to extract traits from {len(files)} images")

@@ -1,9 +1,9 @@
-name: Smart Plant Growth Image Analysis
+name: "Smart Plant Growth: Top-Down Traits From Images"
 author: Suxing Liu
 public: True
 clone: True
-image: docker://computationalplantscience/arabidopsis-rosette-analysis
-commands: arabidopsis luminosity "$INPUT" -o $(dirname $INPUT) && arabidopsis crop $(dirname $INPUT) -o $(dirname $INPUT) -t /opt/arabidopsis-rosette-analysis/marker_template.png -r && arabidopsis extract $(dirname $INPUT) -o $(dirname $INPUT)
+image: docker://computationalplantscience/spg-topdown-traits
+commands: spg extract $(dirname $INPUT) -o $(dirname $INPUT) -l 0.1 -t /opt/arabidopsis-rosette-analysis/marker_template.png -m
 input:
   kind: directory
   path:
@@ -17,7 +17,7 @@ output:
       - png
       - csv
       - xlsx
-logo: rosette.jpg
+logo: media/rosette.jpg
 resources:
   time: "04:00:00"
   mem: "5GB"

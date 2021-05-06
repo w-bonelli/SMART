@@ -357,7 +357,7 @@ def check_discard_merge(options: List[ImageInput], replace: bool = False, thresh
                          options[value].input_file) if replace else f"{join(options[0].output_directory, options[value].input_stem)}.png", image)
 
 
-def check_discard_merge2(options: List[ImageInput], replace: bool = False, threshold: float = 0.1):
+def check_discard_merge2(options: List[ImageInput], threshold: float = 0.1):
     left = None
     right = None
     i = 0
@@ -376,9 +376,9 @@ def check_discard_merge2(options: List[ImageInput], replace: bool = False, thres
             any_dark = True
             continue
         else:
-            cv2.imwrite(
-                join(options[0].output_directory, option.input_file) if replace else f"{join(options[0].output_directory, option.input_stem)}.png",
-                cv2.imread(option.input_file))
+            path = join(options[0].output_directory, Path(option.input_file).name)
+            print(f"Writing to {path}")
+            cv2.imwrite(path, cv2.imread(option.input_file))
         # if luminosity_str == 'dark':
         #     if left is None:
         #         left = i

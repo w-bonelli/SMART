@@ -6,9 +6,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='arabidopsis-rosette-analysis',
-    version='0.3.7',
-    description='Extract traits from top-view images of Arabidopsis plants. ',
+    name='spg-topdown-traits',
+    version='0.3.9',
+    description='Extract geometric traits from top-view images of plants.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Suxing Liu',
@@ -19,7 +19,7 @@ setuptools.setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'arabidopsis = core.cli:cli'
+            'spg = core.cli:cli'
         ]
     },
     python_requires='>=3.6.8',
