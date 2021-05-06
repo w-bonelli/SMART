@@ -2,7 +2,7 @@ name: "Smart Plant Growth: Top-Down Traits From Images"
 author: Suxing Liu
 public: True
 clone: True
-image: docker://computationalplantscience/spg-topdown-traits
+image: docker://computationalplantscience/arabidopsis-rosette-analysis
 commands: spg extract $(dirname $INPUT) -o $(dirname $INPUT) -l 0.1 -t /opt/arabidopsis-rosette-analysis/marker_template.png -m
 input:
   kind: directory

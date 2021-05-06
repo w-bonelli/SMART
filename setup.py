@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='spg-topdown-traits',
-    version='0.3.9',
+    version='0.4',
     description='Extract geometric traits from top-view images of plants.',
     long_description=long_description,
     long_description_content_type="text/markdown",
