@@ -2,8 +2,8 @@
 
 Author: Suxing Liu
 
-![CI](https://github.com/Computational-Plant-Science/arabidopsis-rosette-analysis/workflows/CI/badge.svg)
-[![PyPI version](https://badge.fury.io/py/arabidopsis-rosette-analysis.svg)](https://badge.fury.io/py/arabidopsis-rosette-analysis)
+![CI](https://github.com/Computational-Plant-Science/spg-topdown-traits/workflows/CI/badge.svg)
+[![PyPI version](https://badge.fury.io/py/spg-topdown-traits.svg)](https://badge.fury.io/py/spg-topdown-traits)
 
 Robust and parameter-free plant image segmentation and trait extraction.
 
@@ -51,7 +51,7 @@ The `-l 0.1` option sets a luminosity threshold of 10%. Images darker than this 
 
 #### Marker template
 
-You must provide a marker template image to use `spg-topdown-traits`. By default, an image named `marker_template.png` is expected in the working directory. You can also provide a different image path with the `-t (--template)` argument. A template is provided in the Docker image at `/opt/arabidopsis-rosette-analysis/marker_template.png`.
+You must provide a marker template image to use `spg-topdown-traits`. By default, an image named `marker_template.png` is expected in the working directory. You can also provide a different image path with the `-t (--template)` argument. A template is provided in the Docker image at `/opt/spg-topdown-traits/marker_template.png`.
 
 #### Multiprocessing
 

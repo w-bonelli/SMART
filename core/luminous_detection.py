@@ -170,7 +170,7 @@ from PIL import Image, ImageEnhance
 
 import itertools
 
-TEMPLATE_PATH = "/opt/arabidopsis-rosette-analysis/marker_template/template.png"
+TEMPLATE_PATH = "/opt/spg-topdown-traits/marker_template/template.png"
 
 
 # generate foloder to store the output results

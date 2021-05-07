@@ -1,4 +1,4 @@
-class ArabidopsisRosetteAnalysisResult:
+class ImageResult:
     def __init__(
             self,
             id: str,

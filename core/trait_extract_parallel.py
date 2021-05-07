@@ -50,7 +50,7 @@ from tabulate import tabulate
 
 from core.luminous_detection import isbright, write_results_to_csv
 from core.options import ImageInput
-from core.results import ArabidopsisRosetteAnalysisResult
+from core.results import ImageResult
 from core.thresholding import otsu_threshold
 
 warnings.filterwarnings("ignore")
@@ -1183,7 +1183,7 @@ def check_discard_merge(options: List[ImageInput]):
     return any_dark
 
 
-def trait_extract(options: ImageInput) -> ArabidopsisRosetteAnalysisResult:
+def trait_extract(options: ImageInput) -> ImageResult:
     try:
         _, file_extension = os.path.splitext(options.input_file)
         file_size = os.path.getsize(options.input_file) / MBFACTOR
@@ -1347,10 +1347,10 @@ def trait_extract(options: ImageInput) -> ArabidopsisRosetteAnalysisResult:
 
         # Path("/tmp/d/a.dat").name
 
-        return ArabidopsisRosetteAnalysisResult(options.input_stem, False, area, solidity, max_width, max_height, avg_curv, n_leaves)
+        return ImageResult(options.input_stem, False, area, solidity, max_width, max_height, avg_curv, n_leaves)
     except:
         print(f"Error in trait extraction: {traceback.format_exc()}")
-        return ArabidopsisRosetteAnalysisResult(options.input_stem, True, None, None, None, None, None, None)
+        return ImageResult(options.input_stem, True, None, None, None, None, None, None)
 
 
 if __name__ == '__main__':

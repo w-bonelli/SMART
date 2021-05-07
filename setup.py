@@ -7,14 +7,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='spg-topdown-traits',
-    version='0.4.5',
+    version='0.4.6',
     description='Extract geometric traits from top-view images of plants.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Suxing Liu',
     author_email='suxing.liu@uga.edu',
     license='BSD-3-Clause',
-    url='https://github.com/Computational-Plant-Science/arabidopsis-rosette-analysis',
+    url='https://github.com/Computational-Plant-Science/spg-topdown-traits',
     packages=setuptools.find_packages(),
     include_package_data=True,
     entry_points={
