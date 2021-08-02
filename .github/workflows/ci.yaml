@@ -28,10 +28,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          # python
           python -m pip install --upgrade pip
-          pip install flake8 pytest coveralls setuptools wheel twine
-          pip install -e .
+          python -m pip install flake8 pytest coveralls setuptools wheel twine
+          python -m pip install -e .
       - name: Publish package
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
