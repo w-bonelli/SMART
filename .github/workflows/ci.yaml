@@ -39,6 +39,8 @@ jobs:
         run: |
           old_version=$(pip install spg==random 2>&1 >/dev/null | sed 's|.*versions: \([^ ]*\)).*|\1|g' | head -n 1 | xargs)
           new_version=$(pip show spg | sed 's|.*Version: \([^ ]*\).*|\1|g' | sed -n 2p)
+	  echo $old_version
+	  echo $new_version
           if ! [[ "$new_version" = "$old_version" ]]; then
             python3 setup.py sdist bdist_wheel
             python3 -m twine upload dist/*
