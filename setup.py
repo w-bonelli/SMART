@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='spg',
-    version='0.4.8',
+    version='0.4.9',
     description='Extract geometric traits from top-view images of plants.',
     long_description=long_description,
     long_description_content_type="text/markdown",
