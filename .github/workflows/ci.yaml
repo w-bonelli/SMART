@@ -52,7 +52,7 @@ jobs:
       - name: Build & publish container
         run: |
           docker build -t computationalplantscience/smart -f Dockerfile .
-          docker push computationalplantscience/spg
+          docker push computationalplantscience/smart
       - name: Slack success notification
         uses: rtCamp/action-slack-notify@v2
         env:
