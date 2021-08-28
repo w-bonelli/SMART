@@ -2,10 +2,9 @@
 
 Author: Suxing Liu
 
-![CI](https://github.com/Computational-Plant-Science/spg-topdown-traits/workflows/CI/badge.svg)
-[![PyPI version](https://badge.fury.io/py/spg-topdown-traits.svg)](https://badge.fury.io/py/spg-topdown-traits)
+![CI](https://github.com/Computational-Plant-Science/smart/workflows/CI/badge.svg)
 
-Robust and parameter-free plant image segmentation and trait extraction.
+Robust and parameter-free top-down plant image segmentation and trait extraction.
 
 1. Process with plant image top view, including whole tray plant image, this tool will segment it into individual images.
 2. Robust segmentation based on parameter-free color clustering method.
@@ -27,19 +26,19 @@ Robust and parameter-free plant image segmentation and trait extraction.
 
 The easiest way to run this project in a Unix environment is with [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/).
 
-For instance, to pull the `computationalplantscience/spg` image, mount the current working directory, and open a shell:
+For instance, to pull the `computationalplantscience/smart` image, mount the current working directory, and open a shell:
 
-`docker run -it -v $(pwd):/opt/dev -w /opt/dev computationalplantscience/spg bash`
+`docker run -it -v $(pwd):/opt/dev -w /opt/dev computationalplantscience/smart bash`
 
 Singularity users:
 
-`singularity shell docker://computationalplantscience/spg-topdown-traits`
+`singularity shell docker://computationalplantscience/smart`
 
 ## Usage
 
 A typical use case might look like:
 
-`spg extract <input directory> -o <output directory> -l 0.1 -t /opt/spg-topdown-traits/marker_template.png -m`
+`smart traits <input directory> -o <output directory> -l 0.1 -t /opt/smart/marker_template.png -m`
 
 #### Output directory
 
@@ -51,7 +50,7 @@ The `-l 0.1` option sets a luminosity threshold of 10%. Images darker than this 
 
 #### Marker template
 
-You must provide a marker template image to use `spg-topdown-traits`. By default, an image named `marker_template.png` is expected in the working directory. You can also provide a different image path with the `-t (--template)` argument. A template is provided in the Docker image at `/opt/spg-topdown-traits/marker_template.png`.
+You must provide a marker template image to use `smart`. By default, an image named `marker_template.png` is expected in the working directory. You can also provide a different image path with the `-t (--template)` argument. A template is provided in the Docker image at `/opt/smart/marker_template.png`.
 
 #### Multiprocessing
 

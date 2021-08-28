@@ -19,7 +19,7 @@ setuptools.setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'spg = core.cli:cli'
+            'smart = core.cli:cli'
         ]
     },
     python_requires='>=3.6.8',

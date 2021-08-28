@@ -69,7 +69,7 @@ def enhance(source, output_directory, file_types, replace):
 @click.option('-l', '--luminosity_threshold', required=False, type=float, default=0.1)
 @click.option('-t', '--template', required=False, type=str, default='marker_template.png')
 @click.option('-m', '--multiprocessing', is_flag=True)
-def extract(source, output_directory, file_types, luminosity_threshold, template, multiprocessing):
+def traits(source, output_directory, file_types, luminosity_threshold, template, multiprocessing):
     Path(output_directory).mkdir(parents=True, exist_ok=True)
 
     if Path(source).is_file():
