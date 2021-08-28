@@ -1,8 +1,8 @@
-# Smart plant growth
+# SMART: Speedy Measurement of Arabidopsis Rosette Traits
 
 Author: Suxing Liu
 
-![CI](https://github.com/Computational-Plant-Science/smart/workflows/CI/badge.svg)
+![CI](https://github.com/Computational-Plant-Science/SMART/workflows/CI/badge.svg)
 
 Robust and parameter-free top-down plant image segmentation and trait extraction.
 

@@ -10,10 +10,10 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: plantit-dev
-          SLACK_ICON: https://raw.githubusercontent.com/Computational-Plant-Science/spg-topdown-traits/master/rosette_logo.jpg
+          SLACK_ICON: https://raw.githubusercontent.com/Computational-Plant-Science/SMART/master/rosette_logo.jpg
           SLACK_MESSAGE: 'Build started'
-          SLACK_TITLE: "Smart Plant Growth: Top-Down Traits"
-          SLACK_USERNAME: spg-topdown-traits
+          SLACK_TITLE: "SMART"
+          SLACK_USERNAME: SMART
   publish:
     runs-on: ubuntu-latest
     strategy:
@@ -36,8 +36,8 @@ jobs:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          old_version=$(pip install spg==random 2>&1 >/dev/null | sed 's|.*, \([^ ]*\)).*|\1|g' | head -n 1 | xargs)
-          new_version=$(pip show spg | sed 's|.*Version: \([^ ]*\).*|\1|g' | sed -n 2p)
+          old_version=$(pip install smart-arabidopsis-traits==random 2>&1 >/dev/null | sed 's|.*, \([^ ]*\)).*|\1|g' | head -n 1 | xargs)
+          new_version=$(pip show smart-arabidopsis-traits | sed 's|.*Version: \([^ ]*\).*|\1|g' | sed -n 2p)
           echo "$old_version"
           echo "$new_version"
           if ! [[ "$new_version" = "$old_version" ]]; then
@@ -51,14 +51,14 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build & publish container
         run: |
-          docker build -t computationalplantscience/spg -f Dockerfile .
+          docker build -t computationalplantscience/smart -f Dockerfile .
           docker push computationalplantscience/spg
       - name: Slack success notification
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: plantit-dev
-          SLACK_ICON: https://raw.githubusercontent.com/Computational-Plant-Science/spg-topdown-traits/master/rosette_logo.jpg
+          SLACK_ICON: https://raw.githubusercontent.com/Computational-Plant-Science/SMART/master/rosette_logo.jpg
           SLACK_MESSAGE: 'Build succeeded'
-          SLACK_TITLE: 'Smart Plant Growth: Top-Down Traits'
-          SLACK_USERNAME: spg-topdown-traits
+          SLACK_TITLE: 'SMART'
+          SLACK_USERNAME: SMART
