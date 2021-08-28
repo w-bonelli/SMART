@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='smart-arabidopsis-traits',
-    version='0.5.1',
+    version='0.5.2',
     description='Extract geometric traits from top-view images of plants.',
     long_description=long_description,
     long_description_content_type="text/markdown",
