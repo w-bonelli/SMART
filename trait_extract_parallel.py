@@ -245,7 +245,7 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     
     nb_components = nb_components - 1
     
-    min_size = 2000*2
+    min_size = 100*2
     
     max_size = width*height*0.1
     
@@ -279,9 +279,13 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     #print("img_thresh.dtype")
     #print(img_thresh.dtype)
     
+    
+    #if mask contains mutiple non-conected parts, combine them into one. 
     contours, hier = cv2.findContours(img_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     if len(contours) > 1:
+        
+        print("mask contains mutiple non-conected parts, combine them into one\n")
         
         kernel = np.ones((4,4), np.uint8)
 
@@ -582,6 +586,7 @@ def leaf_traits_computation(orig, labels, save_path, base_name, file_extension):
     leaf_color_ratio_rec = []
     leaf_color_value_rec = []
     
+    box_coord_rec = []
     
     count = 0
     
@@ -605,9 +610,7 @@ def leaf_traits_computation(orig, labels, save_path, base_name, file_extension):
         #get the medial axis of the contour
         image_skeleton, skeleton = skeleton_bw(mask)
 
-        
-        
-        
+                
         # apply individual object mask
         masked = cv2.bitwise_and(orig, orig, mask = mask)
         
@@ -700,6 +703,25 @@ def leaf_traits_computation(orig, labels, save_path, base_name, file_extension):
         color_rgb = tuple([255*x for x in color_rgb])
         
         
+        # get coordinates of bounding box
+        
+        #(x,y,w,h) = cv2.boundingRect(c)
+        
+        rect = cv2.minAreaRect(c)
+        box = cv2.boxPoints(rect)
+        box = np.array(box, dtype="int")
+        box_coord_flat = box.flatten()
+
+        box_coord = []
+        for item in box_coord_flat:
+            box_coord.append(item)
+            
+        #box_coord_list = list(map(int,box_coord.split()))
+        #print(type(box_coord))
+        #print("bbox coordinates :{0}".format(box_coord))
+        
+        
+        
         # draw a circle enclosing the object
         ((x, y), r) = cv2.minEnclosingCircle(c)
         #label_trait = cv2.circle(orig, (int(x), int(y)), 3, (0, 255, 0), 2)
@@ -712,6 +734,8 @@ def leaf_traits_computation(orig, labels, save_path, base_name, file_extension):
         label_trait = cv2.putText(orig, "#{}".format(i+1), (int(x) - 10, int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_rgb, 1)
         #label_trait = cv2.putText(backgd, "#{}".format(i+1), (int(x) - 10, int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_rgb, 1)
         
+        #draw mini bounding box
+        #label_trait = cv2.drawContours(orig, [box], -1, (0, 255, 0), 2)
         
         #######################################individual leaf curvature computation
         
@@ -771,6 +795,7 @@ def leaf_traits_computation(orig, labels, save_path, base_name, file_extension):
         major_axis_rec.append(rmajor)
         minor_axis_rec.append(rminor)
         
+        box_coord_rec.append(box_coord)
     ################################################################################
     
     
@@ -783,7 +808,10 @@ def leaf_traits_computation(orig, labels, save_path, base_name, file_extension):
     else:
         n_contours = 1.0
     
-    return sum(curv_rec)/n_contours, label_trait, track_trait, leaf_index_rec, contours_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec, leaf_color_ratio_rec, leaf_color_value_rec
+    
+    #print(leaf_color_ratio_rec)
+    
+    return sum(curv_rec)/n_contours, label_trait, track_trait, leaf_index_rec, contours_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec, leaf_color_ratio_rec, leaf_color_value_rec, box_coord_rec
     
     
 
@@ -1392,14 +1420,14 @@ def extract_traits(image_file):
         
         ############################################## leaf number computation
         
-        if area > 100000:
-            min_distance_value = 45
-        elif area > 50000:
-            min_distance_value = 40
-        elif area > 20000:
-            min_distance_value = 35
+        if area > 20000:
+            min_distance_value = 10
+        elif area > 10000:
+            min_distance_value = 7
+        elif area > 5000:
+            min_distance_value = 7
         else:
-            min_distance_value = 25
+            min_distance_value = 5
             
         print("min_distance_value = {}\n".format(min_distance_value))
         
@@ -1430,9 +1458,45 @@ def extract_traits(image_file):
         #plt.imsave(result_file, img_as_float(labels), cmap = "Spectral")
         cv2.imwrite(result_file, labeled_img)
         
-        (avg_curv, label_trait, track_trait, leaf_index_rec, contours_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec, leaf_color_ratio_rec, leaf_color_value_rec) = leaf_traits_computation(orig, labels, save_path, base_name, file_extension)
+        (avg_curv, label_trait, track_trait, leaf_index_rec, contours_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec, leaf_color_ratio_rec, leaf_color_value_rec, box_coord_rec) = leaf_traits_computation(orig, labels, save_path, base_name, file_extension)
         
-        #print(area_rec, curv_rec, color_ratio_rec)
+        
+        #########################################################validation purpose, can be removed 
+        #write out box coordinates for validation
+        #print("bbox coordinates :{0}".format((box_coord_rec)))
+        
+        wb = openpyxl.Workbook()
+        sheet = wb.active
+        
+        sheet_leaf = wb.create_sheet()
+
+        sheet.cell(row = 1, column = 1).value = 'c1x'
+        sheet.cell(row = 1, column = 2).value = 'c1y'
+        sheet.cell(row = 1, column = 3).value = 'c2x'
+        sheet.cell(row = 1, column = 4).value = 'c2y'
+        sheet.cell(row = 1, column = 5).value = 'c3x'
+        sheet.cell(row = 1, column = 6).value = 'c3y'
+        sheet.cell(row = 1, column = 7).value = 'c4x'
+        sheet.cell(row = 1, column = 8).value = 'c4y'
+        
+        for row in box_coord_rec:
+            sheet.append(row)
+       
+        #file name and path
+        bbox_file = (args["path"] + 'bbox.xlsx')
+        
+        wb.save(bbox_file)
+        
+        bbox_file_csv = (args["path"] + 'bbox.csv')
+        #convert xlsx to csv format
+        wb = openpyxl.load_workbook(bbox_file)
+        sh = wb.active # was .get_active_sheet()
+        with open(bbox_file_csv, 'w', newline = "") as f:
+            c = csv.writer(f)
+            for r in sh.rows: # generator; was sh.rows
+                c.writerow([cell.value for cell in r])
+            
+        #################################################################end of validation file
         
         n_leaves = int(len((leaf_index_rec)))
         
@@ -1509,6 +1573,8 @@ if __name__ == '__main__':
         (filename, area, solidity, max_width, max_height, avg_curv, n_leaves, color_ratio, hex_colors, leaf_index_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec, leaf_color_ratio_rec, leaf_color_value_rec) = extract_traits(image)
         
         result_list.append([filename, area, solidity, max_width, max_height, avg_curv, n_leaves, color_ratio[0], color_ratio[0], color_ratio[0], color_ratio[0], hex_colors[0], hex_colors[1], hex_colors[2], hex_colors[3]])
+        
+        #print(leaf_color_value_rec)
         
         for i in range(len(leaf_index_rec)):
             
