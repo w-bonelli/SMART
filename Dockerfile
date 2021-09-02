@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 LABEL maintainer="Suxing Liu, Wes Bonelli"
 
-COPY . /opt/spg-topdown-traits
+COPY . /opt/smart
 
 RUN apt-get update && \
     apt-get install -y \
@@ -17,7 +17,7 @@ RUN apt-get update && \
     libxrender1
 
 RUN pip3 install --upgrade pip && \
-    pip3 install -e /opt/spg-topdown-traits
+    pip3 install -e /opt/smart
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8

@@ -6,20 +6,20 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='spg',
-    version='0.4.9',
+    name='smart-arabidopsis-traits',
+    version='0.5.2',
     description='Extract geometric traits from top-view images of plants.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Suxing Liu',
     author_email='suxing.liu@uga.edu',
     license='BSD-3-Clause',
-    url='https://github.com/Computational-Plant-Science/spg-topdown-traits',
+    url='https://github.com/Computational-Plant-Science/SMART',
     packages=setuptools.find_packages(),
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'spg = core.cli:cli'
+            'smart = core.cli:cli'
         ]
     },
     python_requires='>=3.6.8',
