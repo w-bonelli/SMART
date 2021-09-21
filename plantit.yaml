@@ -3,9 +3,9 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/smart
-commands: smart traits $INPUT -o $(dirname $INPUT) -l 0.1 -t /opt/smart/marker_template.png
+commands: python3 /opt/smart/core/cli.py traits $INPUT -o $(dirname $INPUT)
 input:
-  kind: directory
+  kind: file
   path:
   filetypes:
     - jpg

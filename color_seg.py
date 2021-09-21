@@ -402,7 +402,7 @@ def comp_external_contour(orig, thresh, save_path):
         closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
         
         trait_img = closing
-        
+
     
 
     
@@ -561,13 +561,12 @@ if __name__ == '__main__':
     #accquire image file list
     filetype = '*.' + ext
     image_file_path = file_path + filetype
-    
+
     #accquire image file list
     imgList = sorted(glob.glob(image_file_path))
-    
-    
+
     global  template
-    template_path = "/home/suxing/smart_plant/marker_template/sticker_template.jpg"
+    template_path = "/opt/smart/marker_template/sticker_template.jpg"
     # Read the template 
     template = cv2.imread(template_path, 0) 
     print(template)
