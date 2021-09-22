@@ -3,7 +3,7 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/smart
-commands: ./plantit_pipeline.sh
+commands: /opt/smart/plantit_pipeline.sh
 input:
   kind: directory
   path:
