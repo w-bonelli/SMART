@@ -5,7 +5,7 @@ clone: True
 image: docker://computationalplantscience/smart
 commands: ./plantit_pipeline.sh
 input:
-  kind: file
+  kind: directory
   path:
   filetypes:
     - jpg
