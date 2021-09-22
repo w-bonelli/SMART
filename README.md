@@ -18,7 +18,6 @@ Robust and parameter-free top-down plant image segmentation and trait extraction
 
 - [Requirements](#requirements)
 - [Usage](#usage)
-  - [Multiprocessing](#multiprocessing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
