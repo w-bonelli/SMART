@@ -18,7 +18,6 @@ Robust and parameter-free top-down plant image segmentation and trait extraction
 
 - [Requirements](#requirements)
 - [Usage](#usage)
-  - [Multiprocessing](#multiprocessing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -36,22 +35,10 @@ Singularity users:
 
 ## Usage
 
-A typical use case might look like:
+To perform color segmentation:
 
-`smart traits <input directory> -o <output directory> -l 0.1 -t /opt/smart/marker_template.png -m`
+`python3 /opt/smart/core/color_seg.py -p /path/to/input/folder -r /path/to/output/folder -ft jpg,png`
 
-#### Output directory
+To extract traits:
 
-By default, output files will be written to the current working directory. To provide a different path, use the `-o` option.
-
-#### Luminosity threshold
-
-The `-l 0.1` option sets a luminosity threshold of 10%. Images darker than this will not be processed.
-
-#### Marker template
-
-You must provide a marker template image to use `smart`. By default, an image named `marker_template.png` is expected in the working directory. You can also provide a different image path with the `-t (--template)` argument. A template is provided in the Docker image at `/opt/smart/marker_template.png`.
-
-#### Multiprocessing
-
-To allow the `extract` command to process images in parallel if multiple cores are available, use the `-m` flag.
+`python3 /opt/smart/core/trait_extract_parallel_ori.py -p /path/to/input/folder -r /path/to/output/folder -ft jpg,png`

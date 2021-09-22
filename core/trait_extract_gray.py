@@ -113,13 +113,13 @@ def mkdir(path):
     # process
     if not isExists:
         # construct the path and folder
-        print(path + ' folder constructed!')
+        print path + ' folder constructed!'
         # make dir
         os.makedirs(path)
         return True
     else:
         # if exists, return 
-        print(path+' path exists!')
+        print path+' path exists!'
         return False
         
 
@@ -438,7 +438,7 @@ def extract_traits(image):
     mkpath = os.path.dirname(abs_path) +'/' + base_name
     mkdir(mkpath)
     save_path = mkpath + '/'
-    print("results_folder: " + save_path)
+    print "results_folder: " + save_path  
     
     if (file_size > 5.0):
         print("It will take some time due to larger file size {0} MB".format(str(int(file_size))))
@@ -510,7 +510,7 @@ if __name__ == '__main__':
     image = cv2.imread(args['image'])
     
     print(image.shape)
-    print(image.dtype)
+    print image.dtype
     
     if args['color_space'] == 'gray':
         
