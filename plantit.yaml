@@ -3,7 +3,7 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/smart
-commands: python3 /opt/smart/core/cli.py traits $INPUT -o $(dirname $INPUT)
+commands: ./plantit_pipeline.sh
 input:
   kind: file
   path:
