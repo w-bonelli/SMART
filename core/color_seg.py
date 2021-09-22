@@ -498,7 +498,8 @@ if __name__ == '__main__':
 
     # setting path to model file
     file_path = args["path"]
-    result_path = args["result"] if "result" in args else os.getcwd()
+    result_path = args["result"] if args["result"] is not None else os.getcwd()
+    print(result_path)
     args_colorspace = args['color_space']
     args_channels = args['channels']
     args_num_clusters = args['num_clusters']

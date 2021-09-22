@@ -1217,7 +1217,7 @@ if __name__ == '__main__':
 
     # setting path to model file
     file_path = args["path"]
-    result_path = args["result"] if "result" in args else os.getcwd()
+    result_path = args["result"] if args["result"] is not None else os.getcwd()
     ext = args['filetype'].split(',') if 'filetype' in args else []
     patterns = [join(file_path, f"*.{p}") for p in ext]
     files = [f for fs in [glob.glob(pattern) for pattern in patterns] for f in fs]

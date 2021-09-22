@@ -7,7 +7,7 @@ commands: /opt/smart/plantit_pipeline.sh
 input:
   kind: directory
   path:
-  filetypes:
+  patterns:
     - jpg
     - png
 output:
