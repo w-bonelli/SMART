@@ -1242,7 +1242,7 @@ if __name__ == '__main__':
 
     '''
     # get cpu number for parallel processing
-    agents = psutil.cpu_count()
+    agents = psutil.cpu_count(logical=False)
     # agents = multiprocessing.cpu_count()
     # agents = 8
 

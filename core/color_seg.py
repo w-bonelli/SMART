@@ -227,7 +227,7 @@ def medial_axis_image(thresh):
 '''
 
 
-class clockwise_angle_and_distance():
+class clockwise_angle_and_distance:
     '''
     A class to tell if point is clockwise from origin or not.
     This helps if one wants to use sorted() on a list of points.
@@ -281,29 +281,29 @@ class clockwise_angle_and_distance():
 
 
 # Detect stickers in the image
-def sticker_detect(img_ori, save_path):
-    '''
+def sticker_detect(image, output_directory):
+    """
     image_file_name = Path(image_file).name
-    
+
     abs_path = os.path.abspath(image_file)
-    
+
     filename, file_extension = os.path.splitext(abs_path)
     base_name = os.path.splitext(os.path.basename(filename))[0]
-    
+
     print("Processing image : {0}\n".format(str(image_file)))
-     
+
     # save folder construction
     mkpath = os.path.dirname(abs_path) +'/cropped'
     mkdir(mkpath)
     save_path = mkpath + '/'
 
     print ("results_folder: " + save_path)
-    '''
+    """
 
     # load the image, clone it for output, and then convert it to grayscale
     # img_ori = cv2.imread(image_file)
 
-    img_rgb = img_ori.copy()
+    img_rgb = image.copy()
 
     # Convert it to grayscale 
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
@@ -418,7 +418,7 @@ def comp_external_contour(orig, thresh, output_directory, base_name):
     return trait_img
 
 
-def segmentation(image_file, output_directory):
+def segmentation(image_file, output_directory, colorspace, channels, clusters):
     abs_path = os.path.abspath(image_file)
 
     filename, file_extension = os.path.splitext(image_file)
@@ -450,7 +450,7 @@ def segmentation(image_file, output_directory):
     orig = image.copy()
 
     # color clustering based plant object segmentation
-    thresh = color_cluster_seg(orig, args_colorspace, args_channels, args_num_clusters, min_size=100)
+    thresh = color_cluster_seg(orig, colorspace, channels, clusters, min_size=100)
 
     result_mask = join(output_directory, base_name + '_color_seg_mask.png')
 
@@ -487,25 +487,23 @@ def segmentation(image_file, output_directory):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    # ap.add_argument('-i', '--image', required = True, help = 'Path to image file')
     ap.add_argument("-p", "--path", required=True, help="path to image file")
-    ap.add_argument("-ft", "--filetype", required=False, help="Image filetype", type=str, default='jpg,png')
+    ap.add_argument("-ft", "--filetypes", required=False, type=str, default='jpg,png')
     ap.add_argument("-r", "--result", required=False, help="result path")
-    ap.add_argument('-s', '--color-space', type=str, default='lab', help='Color space to use: BGR (default), HSV, Lab, YCrCb (YCC)')
+    ap.add_argument('-s', '--colorspace', type=str, default='lab', help='Color space to use: BGR (default), HSV, Lab, YCrCb (YCC)')
     ap.add_argument('-c', '--channels', type=str, default='1', help='Channel indices to use for clustering, where 0 is the first channel')
-    ap.add_argument('-n', '--num-clusters', type=int, default=2, help='Number of clusters for K-means clustering (default 3, min 2)')
+    ap.add_argument('-n', '--clusters', type=int, default=2, help='Number of clusters for K-means clustering (default 3, min 2)')
     args = vars(ap.parse_args())
 
     # setting path to model file
     file_path = args["path"]
     result_path = args["result"] if args["result"] is not None else os.getcwd()
-    print(result_path)
-    args_colorspace = args['color_space']
-    args_channels = args['channels']
-    args_num_clusters = args['num_clusters']
+    colorspace = args['colorspace']
+    channels = args['channels']
+    clusters = args['clusters']
 
-    # accquire image file list
-    ext = args['filetype'].split(',') if 'filetype' in args else []
+    # acquire image file list
+    ext = args['filetypes'].split(',') if 'filetypes' in args else []
     patterns = [join(file_path, f"*.{p}") for p in ext]
     files = [f for fs in [glob.glob(pattern) for pattern in patterns] for f in fs]
     imgList = sorted(files)
@@ -524,13 +522,13 @@ if __name__ == '__main__':
 
     # get cpu number for parallel processing
     # agents = psutil.cpu_count()
-    agents = multiprocessing.cpu_count()
+    agents = psutil.cpu_count(logical=False)
     print("Using {0} cores for parallel color segmentation".format(int(agents)))
 
     # Create a pool of processes. By default, one is created for each CPU in the machine.
     # extract the bouding box for each image in file list
     with closing(Pool(processes=agents)) as pool:
-        args = [(image, result_path) for image in imgList]
+        args = [(image, result_path, colorspace, channels, clusters) for image in imgList]
         result = pool.starmap(segmentation, args)
 
     '''
