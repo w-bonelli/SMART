@@ -1218,8 +1218,9 @@ if __name__ == '__main__':
     # setting path to model file
     file_path = args["path"]
     result_path = args["result"] if args["result"] is not None else os.getcwd()
-    ext = args['filetype'].split(',') if 'filetype' in args else []
-    patterns = [join(file_path, f"*.{p}") for p in ext]
+    extensions = args['filetype'].split(',') if 'filetype' in args else []
+    extensions = [e for es in [[extension.lower(), extension.upper()] for extension in extensions] for e in es]
+    patterns = [join(file_path, f"*.{p}") for p in extensions]
     files = [f for fs in [glob.glob(pattern) for pattern in patterns] for f in fs]
     imgList = sorted(files)
     n_images = len(imgList)

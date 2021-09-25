@@ -504,8 +504,9 @@ if __name__ == '__main__':
     clusters = args['clusters']
 
     # acquire image file list
-    ext = args['filetypes'].split(',') if 'filetypes' in args else []
-    patterns = [join(file_path, f"*.{p}") for p in ext]
+    extensions = args['filetypes'].split(',') if 'filetypes' in args else []
+    extensions = [e for es in [[extension.lower(), extension.upper()] for extension in extensions] for e in es]
+    patterns = [join(file_path, f"*.{e}") for e in extensions]
     files = [f for fs in [glob.glob(pattern) for pattern in patterns] for f in fs]
     imgList = sorted(files)
     n_images = len(imgList)
