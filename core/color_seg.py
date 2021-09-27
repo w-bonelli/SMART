@@ -393,8 +393,7 @@ def comp_external_contour(orig, thresh, output_directory, base_name):
 
     print("contour length {}".format(len(contours)))
 
-    for c in contours:
-
+    for i, c in enumerate(contours):
         # get the bounding rect
         x, y, w, h = cv2.boundingRect(c)
 
@@ -408,13 +407,14 @@ def comp_external_contour(orig, thresh, output_directory, base_name):
 
             print("ROI {} detected ...".format(index))
 
-            cv2.imwrite(join(output_directory, base_name + '_external_contour_' + str(format(index, "02")) + '.png'), roi)
+            cv2.imwrite(join(output_directory, base_name + '_external_contour_' + str(i) + '.png'), roi)
+
+            # color analysis
+            thresh = color_cluster_seg(roi, 'lab', '1', 2, 200)
+            cv2.imwrite(join(output_directory, base_name + '_colors_' + str(i) + '.png'), thresh)
 
             trait_img = cv2.rectangle(orig, (x, y), (x + w, y + h), (255, 255, 0), 3)
-
             # trait_img = cv2.putText(orig, "#{}".format(index), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 3.0, (255, 0, 255), 10)
-
-            index += 1
 
     return trait_img
 

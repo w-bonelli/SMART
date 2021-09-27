@@ -430,7 +430,8 @@ def watershed_seg_marker(orig, thresh, min_distance_value, img_marker):
 '''
 
 
-def comp_external_contour(orig, thresh):
+def comp_external_contour(orig, thresh, base_name, save_path):
+    orig_copy = orig.copy()
     # find contours and get the external one
     contours, hier = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -438,7 +439,7 @@ def comp_external_contour(orig, thresh):
 
     index = 1
 
-    for c in contours:
+    for i, c in enumerate(contours):
 
         # get the bounding rect
         x, y, w, h = cv2.boundingRect(c)
@@ -523,13 +524,29 @@ def comp_external_contour(orig, thresh):
 
             print("Width and height are {0:.2f},{1:.2f}...".format(w, h))
 
+            # color analysis
+            maskk = np.zeros(thresh.shape, dtype="uint8")
+            cv2.drawContours(maskk, [c], 0, 255, -1)
+            # maskk[labels == label] = 255
+            masked = cv2.bitwise_and(orig_copy, orig_copy, mask=maskk)
+            cv2.imwrite(join(save_path, base_name + '_contour_' + str(i) + '_mask.png'), masked)
+
+            reshape = masked.reshape((masked.shape[0] * masked.shape[1], 3))
+            # Find and display most dominant colors
+            clu = KMeans(n_clusters=5).fit(reshape)
+            visualize = visualize_colors(clu, clu.cluster_centers_)
+            visualize = cv2.cvtColor(visualize, cv2.COLOR_RGB2BGR)
+
+            # black = np.zeros(masked_image_rp.shape, np.uint8)
+            # cv2.drawContours(black, [c], -1, color_conversion(np.random.random(3)), 2)
+            cv2.imwrite(join(save_path, base_name + '_contour_' + str(i) + '_colors.png'), visualize)
+
     return trait_img, area, solidity, w, h
 
 
 # individual leaf object segmentation and traits computation
-def leaf_traits_computation(orig, labels, output_directory, base_name):
+def leaf_traits_computation(orig, labels, output_directory, base_name, skeletonize_leaves=False):
     gray = cv2.cvtColor(orig, cv2.COLOR_BGR2GRAY)
-
     leaf_index_rec = []
     contours_rec = []
     area_rec = []
@@ -537,44 +554,28 @@ def leaf_traits_computation(orig, labels, output_directory, base_name):
     solidity_rec = []
     major_axis_rec = []
     minor_axis_rec = []
-
     leaf_color_ratio_rec = []
     leaf_color_value_rec = []
-
     box_coord_rec = []
-
     num_clusters = 5
 
-    # curvature computation
-    # loop over the unique labels returned by the Watershed algorithm
+    # curvature computation: loop over the unique labels returned by the Watershed algorithm
     for index, label in enumerate(np.unique(labels), start=1):
-        # if the label is zero, we are examining the 'background'
-        # so simply ignore it
+        # if the label is zero, we are examining the 'background' so simply ignore it
         if label == 0: continue
 
-        # otherwise, allocate memory for the label region and draw
-        # it on the mask
+        # otherwise, allocate memory for the label region and draw it on the mask
         mask = np.zeros(gray.shape, dtype="uint8")
         mask[labels == label] = 255
-
-        # get the medial axis of the contour
-        image_skeleton, skeleton = skeleton_bw(mask)
-
-        # apply individual object mask
         masked = cv2.bitwise_and(orig, orig, mask=mask)
+        cv2.imwrite(join(output_directory, base_name + '_leaf_' + str(label) + '.png'), masked)
+
+        image_skeleton, skeleton = skeleton_bw(mask)
+        cv2.imwrite(join(output_directory, base_name + '_leaf_skeleton_' + str(label) + '.png'), img_as_ubyte(image_skeleton))
 
         # individual leaf segmentation and color analysis
         ################################################################################
 
-
-        # define result path
-        cv2.imwrite(join(output_directory, base_name + '_leaf_' + str(label) + '.png'), masked)
-
-        # save _skeleton result
-        cv2.imwrite(join(output_directory, base_name + '_leaf_skeleton_' + str(label) + '.png'), img_as_ubyte(image_skeleton))
-
-        # save color quantization result
-        # rgb_colors = color_quantization(image, thresh, save_path, num_clusters)
         (rgb_colors, counts, hex_colors) = color_region(masked, mask, output_directory, base_name, num_clusters, False)
 
         list_counts = list(counts.values())
@@ -632,9 +633,7 @@ def leaf_traits_computation(orig, labels, output_directory, base_name):
         # label_trait = cv2.circle(orig, (int(x), int(y)), 3, (0, 255, 0), 2)
 
         label_trait = cv2.drawContours(orig, [c], -1, color_rgb, 2)
-
         label_trait = cv2.putText(orig, "#{}".format(i + 1), (int(x) - 10, int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_rgb, 1)
-        # label_trait = cv2.putText(backgd, "#{}".format(i+1), (int(x) - 10, int(y)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_rgb, 1)
 
         #######################################individual leaf curvature computation
 
@@ -816,16 +815,42 @@ def get_cmap(n, name='hsv'):
     return plt.cm.get_cmap(name, n)
 
 
+# https://stackoverflow.com/a/58177484/6514033
+def visualize_colors(cluster, centroids):
+    # Get the number of different clusters, create histogram, and normalize
+    labels = np.arange(0, len(np.unique(cluster.labels_)) + 1)
+    (hist, _) = np.histogram(cluster.labels_, bins = labels)
+    hist = hist.astype("float")
+    hist /= hist.sum()
+
+    # Create frequency rect and iterate through each cluster's color and percentage
+    rect = np.zeros((200, 1200, 3), dtype=np.uint8)
+    colors = sorted([(percent, color) for (percent, color) in zip(hist, centroids)])[0:-1]
+    percents = [percent for (percent, color) in colors]
+    normalized_percents = [float(percent) / sum(percents) for percent in percents]
+    normalized_colors = [(percent, color) for (percent, color) in zip(normalized_percents, [c for (p, c) in colors])]
+    start = 0
+    for (percent, color) in normalized_colors:
+        hex_color = RGB2HEX(color)
+        text = f"{hex_color}: {round(percent * 100, 2)}%"
+        print(text)
+
+        end = start + (percent * 1200)
+        x = int(start)
+        y = 0
+        cv2.rectangle(rect, (x, y), (int(end), 200), color.astype("uint8").tolist(), -1)
+        cv2.putText(rect, text, (x, y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
+        start = end
+
+    return rect
+
+
 def color_region(image, mask, save_path, base_name, num_clusters, write=True):
-    # read the image
     # grab image width and height
     (h, w) = image.shape[:2]
 
     # apply the mask to get the segmentation of plant
     masked_image_ori = cv2.bitwise_and(image, image, mask=mask)
-
-    # define result path for labeled images
-    if write: cv2.imwrite(join(save_path, base_name + '_masked.png'), masked_image_ori)
 
     # convert to RGB
     image_RGB = cv2.cvtColor(masked_image_ori, cv2.COLOR_BGR2RGB)
@@ -836,11 +861,8 @@ def color_region(image, mask, save_path, base_name, num_clusters, write=True):
     # convert to float
     pixel_values = np.float32(pixel_values)
 
-    # define stopping criteria
+    # k-means
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
-
-    # number of clusters (K)
-    # num_clusters = 5
     compactness, labels, (centers) = cv2.kmeans(pixel_values, num_clusters, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
     # convert back to 8 bit values
@@ -854,87 +876,47 @@ def color_region(image, mask, save_path, base_name, num_clusters, write=True):
 
     # reshape back to the original image dimension
     segmented_image = segmented_image.reshape(image_RGB.shape)
-
     segmented_image_BRG = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
-    # define result path for labeled images
-    if write: cv2.imwrite(join(save_path, base_name + '_clustered.png'), segmented_image_BRG)
 
-    '''
-    fig = plt.figure()
-    ax = Axes3D(fig)        
-    for label, pix in zip(labels, segmented_image):
-        ax.scatter(pix[0], pix[1], pix[2], color = (centers))
+    cv2.imwrite(join(save_path, base_name + '_masked.png'), masked_image_ori)
+    cv2.imwrite(join(save_path, base_name + '_clustered.png'), segmented_image_BRG)
 
-    result_file = (save_path + base_name + 'color_cluster_distributation.png')
-    plt.savefig(result_file)
-    '''
-    # Show only one chosen cluster
-    # masked_image = np.copy(image)
+    # show only one chosen cluster
     masked_image = np.zeros_like(image_RGB)
 
     # convert to the shape of a vector of pixel values
     masked_image = masked_image.reshape((-1, 3))
-    # color (i.e cluster) to render
-    # cluster = 2
 
     cmap = get_cmap(num_clusters + 1)
-
-    # clrs = sns.color_palette('husl', n_colors = num_clusters)  # a list of RGB tuples
-
     color_conversion = interp1d([0, 1], [0, 255])
 
-    for cluster in range(num_clusters):
-
-        print("Processing color cluster {0} ...".format(cluster))
-        # print(clrs[cluster])
-        # print(color_conversion(clrs[cluster]))
+    for i, cluster in enumerate(range(num_clusters)):
+        print(f"Processing color cluster {cluster}")
 
         masked_image[labels_flat == cluster] = centers[cluster]
-
-        # print(centers[cluster])
-
-        # convert back to original shape
         masked_image_rp = masked_image.reshape(image_RGB.shape)
-
-        # masked_image_BRG = cv2.cvtColor(masked_image, cv2.COLOR_RGB2BGR)
-        # cv2.imwrite('maksed.png', masked_image_BRG)
 
         gray = cv2.cvtColor(masked_image_rp, cv2.COLOR_BGR2GRAY)
 
-        # threshold the image, then perform a series of erosions +
-        # dilations to remove any small regions of noise
         thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)[1]
-
-        # thresh_cleaned = clear_border(thresh)
 
         cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
-        # c = max(cnts, key=cv2.contourArea)
-
-        '''
-        # compute the center of the contour area and draw a circle representing the center
-        M = cv2.moments(c)
-        cX = int(M["m10"] / M["m00"])
-        cY = int(M["m01"] / M["m00"])
-        # draw the countour number on the image
-        result = cv2.putText(masked_image_rp, "#{}".format(cluster + 1), (cX - 20, cY), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
-        '''
 
         if not cnts:
-            print("findContours is empty")
+            print("No contours found")
         else:
-
-            # loop over the (unsorted) contours and draw them
-            for (i, c) in enumerate(cnts):
+            print(f"{len(cnts)} found")
+            for (ii, c) in enumerate(cnts):
                 result = cv2.drawContours(masked_image_rp, c, -1, color_conversion(np.random.random(3)), 2)
-                # result = cv2.drawContours(masked_image_rp, c, -1, color_conversion(clrs[cluster]), 2)
 
             # result = result(np.where(result == 0)== 255)
             result[result == 0] = 255
 
             result_BRG = cv2.cvtColor(result, cv2.COLOR_RGB2BGR)
             # cv2.imwrite(join(save_path, base_name + '_result_' + str(cluster) + '.png'), result_BRG)
-        if write: cv2.imwrite(join(save_path, base_name + '_cluster_' + str(cluster) + '.png'), masked_image_rp)
+        if write:
+            cv2.imwrite(join(save_path, base_name + '_cluster_' + str(cluster) + '.png'), masked_image_rp)
 
     counts = Counter(labels_flat)
     # sort to ensure correct color percentage
@@ -1089,7 +1071,7 @@ def isbright(image_file):
     return np.mean(L) < thresh
 
 
-def extract_traits(image, output_directory):
+def extract_traits(image, output_directory, leaves=False):
     # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     abs_path = abspath(image)
@@ -1112,10 +1094,10 @@ def extract_traits(image, output_directory):
 
         # color clustering based plant object segmentation
         thresh = color_cluster_seg(image_copy, 'lab', '1', 2, 200)
-        cv2.imwrite(join(output_directory, base_name + '_seg.png'), thresh)
+        cv2.imwrite(join(output_directory, base_name + '_overall_seg.png'), thresh)
 
         # find external contour
-        (trait_img, area, solidity, max_width, max_height) = comp_external_contour(image.copy(), thresh)
+        (trait_img, area, solidity, max_width, max_height) = comp_external_contour(image.copy(), thresh, base_name, output_directory)
         cv2.imwrite(join(output_directory, base_name + '_excontour.png'), trait_img)
 
         num_clusters = 5
@@ -1157,8 +1139,12 @@ def extract_traits(image, output_directory):
         labeled_img[label_hue == 0] = 0
         cv2.imwrite(join(output_directory, base_name + '_label.png'), labeled_img)
 
-        (avg_curv, label_trait, track_trait, leaf_index_rec, contours_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec,
-         leaf_color_ratio_rec, leaf_color_value_rec, box_coord_rec) = leaf_traits_computation(image_copy, labels, output_directory, base_name)
+        if leaves:
+            (avg_curv, label_trait, track_trait, leaf_index_rec, contours_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec,
+             leaf_color_ratio_rec, leaf_color_value_rec, box_coord_rec) = leaf_traits_computation(image_copy, labels, output_directory, base_name)
+        else:
+            (avg_curv, label_trait, track_trait, leaf_index_rec, contours_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec,
+             leaf_color_ratio_rec, leaf_color_value_rec, box_coord_rec) = None, None, None, None, None, None, None, None, None, None, None, None, None
 
         wb = openpyxl.Workbook()
         sheet = wb.active
@@ -1174,7 +1160,8 @@ def extract_traits(image, output_directory):
         sheet.cell(row=1, column=7).value = 'c4x'
         sheet.cell(row=1, column=8).value = 'c4y'
 
-        for row in box_coord_rec: sheet.append(row)
+        if box_coord_rec is not None:
+            for row in box_coord_rec: sheet.append(row)
 
         excel_file_path = join(output_directory, 'bbox.xlsx')
         wb.save(excel_file_path)
@@ -1187,7 +1174,7 @@ def extract_traits(image, output_directory):
             for r in sh.rows:  # generator; was sh.rows
                 c.writerow([cell.value for cell in r])
 
-        n_leaves = int(len(leaf_index_rec))
+        n_leaves = int(len(leaf_index_rec)) if leaf_index_rec is not None else 0
 
         # save watershed result label image
         result_file = join(output_directory, base_name + '_leafspec.png')
@@ -1208,6 +1195,7 @@ if __name__ == '__main__':
     ap.add_argument("-p", "--path", required=True, help="path to image file")
     ap.add_argument("-ft", "--filetype", required=False, help="Image filetype", default='jpg,png')
     ap.add_argument("-r", "--result", required=False, help="result path")
+    ap.add_argument('-l', '--leaves', required=False, type=bool, default=False, help='whether to compute leaf traits')
     ap.add_argument('-s', '--color-space', type=str, default='lab', help='Color space to use: BGR (default), HSV, Lab, YCrCb (YCC)')
     ap.add_argument('-c', '--channels', type=str, default='1', help='Channel indices to use for clustering, where 0 is the first channel,'
                                                                     + ' 1 is the second channel, etc. E.g., if BGR color space is used, "02" '
@@ -1224,6 +1212,7 @@ if __name__ == '__main__':
     files = [f for fs in [glob.glob(pattern) for pattern in patterns] for f in fs]
     imgList = sorted(files)
     n_images = len(imgList)
+    leaves = args['leaves'] if args['leaves'] is not None else False
 
     '''
     #loop execute
@@ -1247,12 +1236,12 @@ if __name__ == '__main__':
     # agents = multiprocessing.cpu_count()
     # agents = 8
 
-    print("Using {0} cores to perfrom parallel processing...".format(int(agents)))
+    print(f"Using up to {agents} cores for parallel processing")
 
     # Create a pool of processes. By default, one is created for each CPU in the machine.
     # extract the bouding box for each image in file list
     with closing(Pool(processes=agents)) as pool:
-        args = [(image, result_path) for image in imgList]
+        args = [(image, result_path, leaves) for image in imgList]
         result = pool.starmap(extract_traits, args)
 
     filename = list(zip(*result))[0]
