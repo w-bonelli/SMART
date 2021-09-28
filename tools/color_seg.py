@@ -291,7 +291,7 @@ if __name__ == '__main__':
     
     
     #find external contour 
-    #trait_img = comp_external_contour(image.copy(),thresh)
+    #trait_img = comp_external_contours(image.copy(),thresh)
     #save segmentation result
     #result_file = (save_path + filename + '_excontour' + file_extension)
     #cv2.imwrite(result_file, trait_img)

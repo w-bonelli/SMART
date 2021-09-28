@@ -473,7 +473,7 @@ def segmentation(image_file, output_directory, colorspace, channels, clusters):
     #cv2.imwrite(result_file, sticker_overlay)
 
     thresh_sticker = color_cluster_seg(sticker_crop_img.copy(), args_colorspace, args_channels, 4, min_size = 1000)
-    trait_img_sticker = comp_external_contour(sticker_crop_img.copy(), thresh_sticker, save_path_sticker)
+    trait_img_sticker = comp_external_contours(sticker_crop_img.copy(), thresh_sticker, save_path_sticker)
     result_file_sticker = save_path_sticker +  '_label.' + ext
     cv2.imwrite(result_file_sticker, trait_img_sticker)
     # save segmentation result
@@ -549,7 +549,7 @@ if __name__ == '__main__':
     # cv2.imwrite(result_file, thresh)
 
     # find external contour
-    # trait_img = comp_external_contour(image.copy(),thresh, file_path)
+    # trait_img = comp_external_contours(image.copy(),thresh, file_path)
 
     # save segmentation result
     # result_file = (save_path + filename + '_excontour' + file_extension)
