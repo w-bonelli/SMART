@@ -23,9 +23,9 @@ Robust and parameter-free top-down plant image segmentation and trait extraction
 
 ## Requirements
 
-The easiest way to run this project in a Unix environment is with [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/).
+The easiest way to run this project is with [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/).
 
-For instance, to pull the `computationalplantscience/smart` image, mount the current working directory, and open a shell:
+To pull the `computationalplantscience/smart` image, the current working directory, and open a shell with Docker:
 
 `docker run -it -v $(pwd):/opt/dev -w /opt/dev computationalplantscience/smart bash`
 
@@ -35,10 +35,20 @@ Singularity users:
 
 ## Usage
 
+### Segmentation
+
 To perform color segmentation:
 
-`python3 /opt/smart/core/color_seg.py -p /path/to/input/folder -r /path/to/output/folder -ft jpg,png`
+`python3 /opt/smart/core/color_seg.py -p /path/to/input/file -r /path/to/output/folder`
+
+You can also pass a folder path (`-p /path/to/dir`). By default any `JPG` and `PNG` are included. You can choose filetype explicitly with e.g. `-ft jpg`.
 
 To extract traits:
 
-`python3 /opt/smart/core/trait_extract_parallel_ori.py -p /path/to/input/folder -r /path/to/output/folder -ft jpg,png`
+`python3 /opt/smart/core/trait_extract_parallel_ori.py -p /path/to/input/file -r /path/to/output/folder`
+
+You can also use a folder path as above, likewise for filetype specification.
+
+By default this script will not perform leaf segmentation and analysis. To enable leaf analysis, use the `-l` flag.
+
+To indicate that your input is a multiple-tray or -individual photo, add the `-m` flag.

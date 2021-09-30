@@ -10,6 +10,7 @@ RUN apt-get update && \
     python3-setuptools \
     python3-pip \
     python3-numexpr \
+    python3-distutils \
     libgl1-mesa-glx \
     libsm6 \
     libxext6 \
