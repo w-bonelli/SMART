@@ -4,6 +4,10 @@ public: True
 clone: True
 image: docker://computationalplantscience/smart
 commands: /opt/smart/plantit_pipeline.sh
+params:
+  - name: Multiple
+    type: boolean
+    default: False
 input:
   kind: directory
   path:
