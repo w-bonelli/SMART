@@ -3,9 +3,13 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/smart
-commands: python3 /opt/smart/core/cli.py traits $INPUT -o $(dirname $INPUT)
+commands: /opt/smart/plantit_pipeline.sh
+params:
+  - name: Multiple
+    type: boolean
+    default: False
 input:
-  kind: file
+  kind: directory
   path:
   filetypes:
     - jpg

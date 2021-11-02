@@ -13,11 +13,11 @@ Author: suxing liu
 
 Author-email: suxingliu@gmail.com
 
-Created: 2019-09-29
+Created: 2018-05-29
 
 USAGE:
 
-python3 color_seg.py -p ~/smart_plant/test/ -ft JPG
+python3 demo_color_seg.py -p ~/plant-image-analysis/test/ -ft JPG
 
 
 '''
@@ -337,7 +337,7 @@ def sticker_detect(img_ori, save_path):
     
         (min_val, max_val, min_loc, max_loc) = cv2.minMaxLoc(res)
     
-        print(y,x)
+        #print(y,x)
         
         print(min_val, max_val, min_loc, max_loc)
         
@@ -346,17 +346,15 @@ def sticker_detect(img_ori, save_path):
         endX = startX + template.shape[1]
         endY = startY + template.shape[0]
         
-        '''
+        
         # Draw a rectangle around the matched region. 
         for pt in zip(*loc[::-1]): 
-            sticker_overlay = cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,255,255), 2)
-        '''
+            sticker_overlay = cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,255,0), 1)
+        
         
         sticker_crop_img = img_rgb[startY:endY, startX:endX]
 
-      
-        
-    return  sticker_crop_img
+    return  sticker_crop_img, sticker_overlay
 
 
 
@@ -402,7 +400,7 @@ def comp_external_contour(orig, thresh, save_path):
         closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
         
         trait_img = closing
-
+        
     
 
     
@@ -454,7 +452,6 @@ def comp_external_contour(orig, thresh, save_path):
 
 
 
-
 def segmentation(image_file):
     
     abs_path = os.path.abspath(image_file)
@@ -489,46 +486,72 @@ def segmentation(image_file):
     if (file_size > 5.0):
         print("It will take some time due to large file size {0} MB".format(str(int(file_size))))
     else:
-        print("Segmenting plant object using automatic color clustering method... ")
+        print("Segmenting plant image into blocks... ")
     
     #make backup image
     orig = image.copy()
-
+    
+    
+    '''
     #color clustering based plant object segmentation
     thresh = color_cluster_seg(orig, args_colorspace, args_channels, args_num_clusters, min_size = 100)
     
-    result_mask = save_path + 'mask.' + ext
+    #result_mask = save_path + 'mask.' + ext
     
-    cv2.imwrite(result_mask, thresh)
+    #cv2.imwrite(result_mask, thresh)
     
     
     #find external contour and segment image into small ROI based on each plant
-    trait_img = comp_external_contour(image.copy(), thresh, save_path)
+    trait_img = comp_external_contours(image.copy(), thresh, save_path)
     
     result_file = abs_path +  '_label.' + ext
             
     cv2.imwrite(result_file, trait_img)
     
     '''
-    (sticker_crop_img) = sticker_detect(image.copy(), save_path)
+    
+    
+    (sticker_crop_img, sticker_overlay) = sticker_detect(image.copy(), save_path)
     
     # save segmentation result
-    #result_file = (save_path + base_name + 'sticker_matched.' + args['filetype'])
-    #print(result_file)
-    #cv2.imwrite(result_file, sticker_overlay)
+    result_file = (save_path_sticker + base_name + '_sticker_overlay.' + args['filetype'])
+    print(result_file)
+    cv2.imwrite(result_file, sticker_overlay)
     
-    thresh_sticker = color_cluster_seg(sticker_crop_img.copy(), args_colorspace, args_channels, 4, min_size = 1000)
-    trait_img_sticker = comp_external_contour(sticker_crop_img.copy(), thresh_sticker, save_path_sticker)
-    result_file_sticker = save_path_sticker +  '_label.' + ext
-    cv2.imwrite(result_file_sticker, trait_img_sticker)
-
     # save segmentation result
     result_file = (save_path_sticker + base_name + '_sticker_match.' + args['filetype'])
     #print(result_file)
     cv2.imwrite(result_file, sticker_crop_img)
-    '''
     
-    return thresh
+    
+    thresh_sticker = color_cluster_seg(sticker_crop_img.copy(), args_colorspace, args_channels, 8, min_size = 10)
+    trait_img_sticker = comp_external_contour(sticker_crop_img.copy(), thresh_sticker, save_path_sticker)
+    result_file_sticker = save_path_sticker +  '_label.' + ext
+    cv2.imwrite(result_file_sticker, trait_img_sticker)
+    
+
+    #number of rows
+    nRows = 4
+    # Number of columns
+    mCols = 8
+
+    # Dimensions of the image
+    sizeX = img_width
+    sizeY = img_height
+    #print(img.shape)
+
+
+    for i in range(0, nRows):
+        
+        for j in range(0, mCols):
+            
+            roi = orig[int(i*sizeY/nRows):int(i*sizeY/nRows) + int(sizeY/nRows),int(j*sizeX/mCols):int(j*sizeX/mCols) + int(sizeX/mCols)]
+            
+            result_file = (save_path +  str(i+1) + str(j+1) + '.' + ext)
+            
+            cv2.imwrite(result_file, roi)
+    
+    #return thresh
     #trait_img
     
     
@@ -561,24 +584,26 @@ if __name__ == '__main__':
     #accquire image file list
     filetype = '*.' + ext
     image_file_path = file_path + filetype
-
+    
     #accquire image file list
     imgList = sorted(glob.glob(image_file_path))
-
+    
+    
     global  template
-    template_path = "/opt/smart/marker_template/sticker_template.jpg"
+    # local path needed!
+    template_path = "/home/suxing/plant-image-analysis/marker_template/sticker_template.jpg"
     # Read the template 
     template = cv2.imread(template_path, 0) 
-    print(template)
+    print("template was found")
     
-    #print((imgList))
+    print((imgList))
     
     #current_img = imgList[0]
     
     #(thresh, trait_img) = segmentation(current_img)
     
     
-    # get cpu number for parallel processing
+     # get cpu number for parallel processing
     #agents = psutil.cpu_count()   
     agents = multiprocessing.cpu_count()
     print("Using {0} cores to perform parallel processing... \n".format(int(agents)))
@@ -609,7 +634,7 @@ if __name__ == '__main__':
     
     
     #find external contour 
-    #trait_img = comp_external_contour(image.copy(),thresh, file_path)
+    #trait_img = comp_external_contours(image.copy(),thresh, file_path)
     
     #save segmentation result
     #result_file = (save_path + filename + '_excontour' + file_extension)

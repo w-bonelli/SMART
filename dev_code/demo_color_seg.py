@@ -502,7 +502,7 @@ def segmentation(image_file):
     
     
     #find external contour and segment image into small ROI based on each plant
-    trait_img = comp_external_contour(image.copy(), thresh, save_path)
+    trait_img = comp_external_contours(image.copy(), thresh, save_path)
     
     result_file = abs_path +  '_label.' + ext
             
@@ -634,7 +634,7 @@ if __name__ == '__main__':
     
     
     #find external contour 
-    #trait_img = comp_external_contour(image.copy(),thresh, file_path)
+    #trait_img = comp_external_contours(image.copy(),thresh, file_path)
     
     #save segmentation result
     #result_file = (save_path + filename + '_excontour' + file_extension)

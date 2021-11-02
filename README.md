@@ -18,15 +18,14 @@ Robust and parameter-free top-down plant image segmentation and trait extraction
 
 - [Requirements](#requirements)
 - [Usage](#usage)
-  - [Multiprocessing](#multiprocessing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Requirements
 
-The easiest way to run this project in a Unix environment is with [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/).
+The easiest way to run this project is with [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/).
 
-For instance, to pull the `computationalplantscience/smart` image, mount the current working directory, and open a shell:
+To pull the `computationalplantscience/smart` image, the current working directory, and open a shell with Docker:
 
 `docker run -it -v $(pwd):/opt/dev -w /opt/dev computationalplantscience/smart bash`
 
@@ -36,22 +35,20 @@ Singularity users:
 
 ## Usage
 
-A typical use case might look like:
+### Segmentation
 
-`smart traits <input directory> -o <output directory> -l 0.1 -t /opt/smart/marker_template.png -m`
+To perform color segmentation:
 
-#### Output directory
+`python3 /opt/smart/core/color_seg.py -p /path/to/input/file -r /path/to/output/folder`
 
-By default, output files will be written to the current working directory. To provide a different path, use the `-o` option.
+You can also pass a folder path (`-p /path/to/dir`). By default any `JPG` and `PNG` are included. You can choose filetype explicitly with e.g. `-ft jpg`.
 
-#### Luminosity threshold
+To extract traits:
 
-The `-l 0.1` option sets a luminosity threshold of 10%. Images darker than this will not be processed.
+`python3 /opt/smart/core/trait_extract_parallel_ori.py -p /path/to/input/file -r /path/to/output/folder`
 
-#### Marker template
+You can also use a folder path as above, likewise for filetype specification.
 
-You must provide a marker template image to use `smart`. By default, an image named `marker_template.png` is expected in the working directory. You can also provide a different image path with the `-t (--template)` argument. A template is provided in the Docker image at `/opt/smart/marker_template.png`.
+By default this script will not perform leaf segmentation and analysis. To enable leaf analysis, use the `-l` flag.
 
-#### Multiprocessing
-
-To allow the `extract` command to process images in parallel if multiple cores are available, use the `-m` flag.
+To indicate that your input is a multiple-tray or -individual photo, add the `-m` flag.
