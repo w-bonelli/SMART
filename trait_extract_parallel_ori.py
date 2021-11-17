@@ -1563,30 +1563,25 @@ if __name__ == '__main__':
     
     n_images = len(imgList)
     
-    result_list = []
     
-    result_list_leaf = []
     
+    
+    
+    '''
     #loop execute
     for image in imgList:
         
         (filename, area, solidity, max_width, max_height, avg_curv, n_leaves, color_ratio, hex_colors, leaf_index_rec, area_rec, curv_rec, solidity_rec, major_axis_rec, minor_axis_rec, leaf_color_ratio_rec, leaf_color_value_rec) = extract_traits(image)
         
-        result_list.append([filename, area, solidity, max_width, max_height, avg_curv, n_leaves, color_ratio[0], color_ratio[0], color_ratio[0], color_ratio[0], hex_colors[0], hex_colors[1], hex_colors[2], hex_colors[3]])
+        result_list.append([filename, area, solidity, max_width, max_height, avg_curv, n_leaves, color_ratio[0], color_ratio[1], color_ratio[2], color_ratio[3], hex_colors[0], hex_colors[1], hex_colors[2], hex_colors[3]])
         
         #print(leaf_color_value_rec)
         
         for i in range(len(leaf_index_rec)):
             
             result_list_leaf.append([filename, leaf_index_rec[i], area_rec[i], curv_rec[i], solidity_rec[i], major_axis_rec[i], minor_axis_rec[i], leaf_color_ratio_rec[i][0], leaf_color_ratio_rec[i][1], leaf_color_ratio_rec[i][2], leaf_color_ratio_rec[i][3], leaf_color_value_rec[i][0],leaf_color_value_rec[i][1],leaf_color_value_rec[i][2],leaf_color_value_rec[i][3]])
-    '''
     
-    #print(result_list)
-    
-    for image in imgList:
-    
-        extract_traits(image)
-    '''
+
 
     '''
     # get cpu number for parallel processing
@@ -1599,10 +1594,39 @@ if __name__ == '__main__':
     # Create a pool of processes. By default, one is created for each CPU in the machine.
     # extract the bouding box for each image in file list
     with closing(Pool(processes = agents)) as pool:
-        result_list = pool.map(extract_traits, imgList)
+        result = pool.map(extract_traits, imgList)
         pool.terminate()
-    '''
     
+    
+    filename = list(zip(*result))[0]
+    area = list(zip(*result))[1]
+    solidity = list(zip(*result))[2]
+    max_width = list(zip(*result))[3]
+    max_height = list(zip(*result))[4]
+    avg_curv = list(zip(*result))[5]
+    n_leaves = list(zip(*result))[6]
+    color_ratio = list(zip(*result))[7]
+    hex_colors = list(zip(*result))[8]
+   
+    
+    
+    result_list_whole = []
+    
+    result_list_leaf = []
+    
+    for i, (v0,v1,v2,v3,v4,v5,v6,v7, v8) in enumerate(zip(filename, area, solidity, max_width, max_height, avg_curv, n_leaves, color_ratio, hex_colors)):
+        
+        result_list_whole.append([v0,v1,v2,v3,v4,v5,v6,str(v7), str(v8)])
+        
+    #result_list = list(zip(*result))
+    
+    #print(result_list[0])
+    
+    '''
+    for i in range(len(result_list[-1])):
+            
+        result_list_leaf.append([result_list[], leaf_index_rec[i], area_rec[i], curv_rec[i], solidity_rec[i], major_axis_rec[i], minor_axis_rec[i], leaf_color_ratio_rec[i][0], leaf_color_ratio_rec[i][1], leaf_color_ratio_rec[i][2], leaf_color_ratio_rec[i][3], leaf_color_value_rec[i][0],leaf_color_value_rec[i][1],leaf_color_value_rec[i][2],leaf_color_value_rec[i][3]])
+    '''
     
     #trait_file = (os.path.dirname(os.path.abspath(file_path)) + '/' + 'trait.xlsx')
     
@@ -1610,20 +1634,11 @@ if __name__ == '__main__':
     
     #output in command window in a sum table
  
-    table = tabulate(result_list, headers = ['filename', 'area', 'solidity', 'max_width', 'max_height' ,'avg_curv', 'n_leaves', 'cluster 1', 'cluster 2', 'cluster 3', 'cluster 4', 'cluster 1 hex value', 'cluster 2 hex value', 'cluster 3 hex value', 'cluster 4 hex value'], tablefmt = 'orgtbl')
+    table = tabulate(result_list_whole, headers = ['filename', 'area', 'solidity', 'max_width', 'max_height' ,'avg_curv', 'n_leaves', 'cluster', 'cluster hex value'], tablefmt = 'orgtbl')
 
     print(table + "\n")
     
     
-    '''
-    print("Summary: Leaf specific traits...\n")
-    
-    #output in command window in a sum table
- 
-    table = tabulate(result_list_leaf, headers = ['filename', 'leaf_index', 'area', 'curvature', 'solidity', 'major_axis', 'minor_axis', 'cluster 1', 'cluster 2', 'cluster 3', 'cluster 4', 'cluster 1 hex value', 'cluster 2 hex value', 'cluster 3 hex value', 'cluster 4 hex value'], tablefmt = 'orgtbl')
-
-    print(table + "\n")
-    '''
     
     
     if (args['result']):
@@ -1659,17 +1674,12 @@ if __name__ == '__main__':
         sheet.cell(row = 1, column = 5).value = 'max_height'
         sheet.cell(row = 1, column = 6).value = 'curvature'
         sheet.cell(row = 1, column = 7).value = 'number_leaf'
-        sheet.cell(row = 1, column = 8).value = 'color distribution cluster 1'
-        sheet.cell(row = 1, column = 9).value = 'color distribution cluster 2'
-        sheet.cell(row = 1, column = 10).value = 'color distribution cluster 3'
-        sheet.cell(row = 1, column = 11).value = 'color distribution cluster 4'
-        sheet.cell(row = 1, column = 12).value = 'color cluster 1 hex value'
-        sheet.cell(row = 1, column = 13).value = 'color cluster 2 hex value'
-        sheet.cell(row = 1, column = 14).value = 'color cluster 3 hex value'
-        sheet.cell(row = 1, column = 15).value = 'color cluster 4 hex value'        
+        sheet.cell(row = 1, column = 8).value = 'color distribution'
+        sheet.cell(row = 1, column = 12).value = 'color cluster hex values'
+        
         
     
-        
+        '''
         sheet_leaf.cell(row = 1, column = 1).value = 'filename'
         sheet_leaf.cell(row = 1, column = 2).value = 'leaf_index'
         sheet_leaf.cell(row = 1, column = 3).value = 'area'
@@ -1685,10 +1695,10 @@ if __name__ == '__main__':
         sheet_leaf.cell(row = 1, column = 13).value = 'color cluster 2 hex value'
         sheet_leaf.cell(row = 1, column = 14).value = 'color cluster 3 hex value'
         sheet_leaf.cell(row = 1, column = 15).value = 'color cluster 4 hex value'
+        '''
         
         
-        
-    for row in result_list:
+    for row in result_list_whole:
         sheet.append(row)
    
     #for row in result_list_leaf:
@@ -1702,14 +1712,6 @@ if __name__ == '__main__':
     
     
     
-    '''
-    wb = openpyxl.load_workbook(trait_file)
-    sh = wb.active # was .get_active_sheet()
-    with open(trait_file_csv, 'w', newline = "") as f:
-        c = csv.writer(f)
-        for r in sh.rows: # generator; was sh.rows
-            c.writerow([cell.value for cell in r])
-    '''
 
     
 

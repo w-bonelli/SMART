@@ -17,7 +17,10 @@ Created: 2019-09-29
 
 USAGE:
 
-python3 color_seg.py -p ~/smart_plant/test/ -ft JPG
+python3 color_seg.py -p ~/example/plant_test/ -ft jpg -c 0 -min 100  -max 1500
+
+python3 color_seg.py -p ~/example/plant_test/ -ft jpg 
+
 
 
 '''
@@ -44,6 +47,9 @@ import numpy as np
 import argparse
 import cv2
 
+import openpyxl
+import csv
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
@@ -57,7 +63,105 @@ from contextlib import closing
 
 MBFACTOR = float(1<<20)
 
+from scipy.spatial import distance as dist
+from collections import OrderedDict
 
+
+class ColorLabeler:
+    def __init__(self):
+        # initialize the colors dictionary, containing the color
+        # name as the key and the RGB tuple as the value
+        colors = OrderedDict({
+            "red": (255, 0, 0),
+            "green": (0, 255, 0),
+            "blue": (0, 0, 255)})
+        # allocate memory for the L*a*b* image, then initialize
+        # the color names list
+        self.lab = np.zeros((len(colors), 1, 3), dtype="uint8")
+        self.colorNames = []
+        # loop over the colors dictionary
+        for (i, (name, rgb)) in enumerate(colors.items()):
+            # update the L*a*b* array and the color names list
+            self.lab[i] = rgb
+            self.colorNames.append(name)
+        # convert the L*a*b* array from the RGB color space
+        # to L*a*b*
+        self.lab = cv2.cvtColor(self.lab, cv2.COLOR_RGB2LAB)
+
+
+    def label(self, image, c):
+        # construct a mask for the contour, then compute the
+        # average L*a*b* value for the masked region
+        mask = np.zeros(image.shape[:2], dtype="uint8")
+        cv2.drawContours(mask, [c], -1, 255, -1)
+        mask = cv2.erode(mask, None, iterations=2)
+        mean = cv2.mean(image, mask=mask)[:3]
+        # initialize the minimum distance found thus far
+        minDist = (np.inf, None)
+        # loop over the known L*a*b* color values
+        for (i, row) in enumerate(self.lab):
+            # compute the distance between the current L*a*b*
+            # color value and the mean of the image
+            d = dist.euclidean(row[0], mean)
+            # if the distance is smaller than the current distance,
+            # then update the bookkeeping variable
+            if d < minDist[0]:
+                minDist = (d, i)
+        # return the name of the color with the smallest distance
+        return self.colorNames[minDist[1]]
+
+class clockwise_angle_and_distance():
+    
+
+    '''
+    A class to tell if point is clockwise from origin or not.
+    This helps if one wants to use sorted() on a list of points.
+
+    Parameters
+    ----------
+    point : ndarray or list, like [x, y]. The point "to where" we g0
+    self.origin : ndarray or list, like [x, y]. The center around which we go
+    refvec : ndarray or list, like [x, y]. The direction of reference
+
+    use: 
+        instantiate with an origin, then call the instance during sort
+    reference: 
+    https://stackoverflow.com/questions/41855695/sorting-list-of-two-dimensional-coordinates-by-clockwise-angle-using-python
+
+    Returns
+    -------
+    angle
+    
+    distance
+    
+
+    '''
+    def __init__(self, origin):
+        self.origin = origin
+
+    def __call__(self, point, refvec = [0, 1]):
+        if self.origin is None:
+            raise NameError("clockwise sorting needs an origin. Please set origin.")
+        # Vector between point and the origin: v = p - o
+        vector = [point[0]-self.origin[0], point[1]-self.origin[1]]
+        # Length of vector: ||v||
+        lenvector = np.linalg.norm(vector[0] - vector[1])
+        # If length is zero there is no angle
+        if lenvector == 0:
+            return -pi, 0
+        # Normalize vector: v/||v||
+        normalized = [vector[0]/lenvector, vector[1]/lenvector]
+        dotprod  = normalized[0]*refvec[0] + normalized[1]*refvec[1] # x1*x2 + y1*y2
+        diffprod = refvec[1]*normalized[0] - refvec[0]*normalized[1] # x1*y2 - y1*x2
+        angle = math.atan2(diffprod, dotprod)
+        # Negative angles represent counter-clockwise angles so we need to 
+        # subtract them from 2*pi (360 degrees)
+        if angle < 0:
+            return 2*math.pi+angle, lenvector
+        # I return first the angle because that's the primary sorting criterium
+        # but if two vectors have the same angle then the shorter distance 
+        # should come first.
+        return angle, lenvector
 
 # generate foloder to store the output results
 def mkdir(path):
@@ -184,30 +288,52 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters, 
     
     #min_size = 70
     
-    max_size = width*height*0.1
+    #max_size = width*height*0.1
     
     img_thresh = np.zeros([width, height], dtype=np.uint8)
     
     #for every component in the image, keep it only if it's above min_size
     for i in range(0, nb_components):
-        '''
-        #print("{} nb_components found".format(i))
         
-        if (sizes[i] >= min_size) and (Coord_left[i] > 1) and (Coord_top[i] > 1) and (Coord_width[i] - Coord_left[i] > 0) and (Coord_height[i] - Coord_top[i] > 0) and (centroids[i][0] - width*0.5 < 10) and ((centroids[i][1] - height*0.5 < 10)) and ((sizes[i] <= max_size)):
+        #print("{} nb_components found".format(i))
+        '''
+        if (sizes[i] >= min_size) and (Coord_left[i] > 1) and (Coord_top[i] > 1) and (Coord_width[i] - Coord_left[i] > 0) and (Coord_height[i] - Coord_top[i] > 0) and (centroids[i][0] - width*0.5 < 5) and ((centroids[i][1] - height*0.5 < 5)) and ((sizes[i] <= max_size)):
             img_thresh[output == i + 1] = 255
             
             print("Foreground center found ")
             
-        elif ((Coord_width[i] - Coord_left[i])*0.5 - width < 15) and (centroids[i][0] - width*0.5 < 15) and (centroids[i][1] - height*0.5 < 15) and ((sizes[i] <= max_size)):
+        elif ((Coord_width[i] - Coord_left[i])*0.5 - width < 5) and (centroids[i][0] - width*0.5 < 5) and (centroids[i][1] - height*0.5 < 5) and ((sizes[i] <= max_size)):
             imax = max(enumerate(sizes), key=(lambda x: x[1]))[0] + 1    
-            img_thresh[output == imax] = 255
+            #img_thresh[output == imax] = 255
+            img_thresh[output == i + 1] = 255
             print("Foreground max found ")
         '''
         
-        if (sizes[i] >= min_size):
+        if (sizes[i] >= min_size) and (sizes[i] < max_size):
         
             img_thresh[output == i + 1] = 255
         
+        
+    
+    #if mask contains mutiple non-conected parts, combine them into one. 
+    contours, hier = cv2.findContours(img_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    #size_kernel = 13
+    
+    if len(contours) > 1:
+        
+        print("mask contains mutiple non-conected parts, combine them into one\n")
+        
+        kernel = np.ones((size_kernel,size_kernel), np.uint8)
+
+        dilation = cv2.dilate(img_thresh.copy(), kernel, iterations = 1)
+        
+        closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
+        
+        img_thresh = closing
+    
+    
+    
     #from skimage import img_as_ubyte
     
     #img_thresh = img_as_ubyte(img_thresh)
@@ -232,58 +358,7 @@ def medial_axis_image(thresh):
 '''
 
 
-class clockwise_angle_and_distance():
-    
 
-    '''
-    A class to tell if point is clockwise from origin or not.
-    This helps if one wants to use sorted() on a list of points.
-
-    Parameters
-    ----------
-    point : ndarray or list, like [x, y]. The point "to where" we g0
-    self.origin : ndarray or list, like [x, y]. The center around which we go
-    refvec : ndarray or list, like [x, y]. The direction of reference
-
-    use: 
-        instantiate with an origin, then call the instance during sort
-    reference: 
-    https://stackoverflow.com/questions/41855695/sorting-list-of-two-dimensional-coordinates-by-clockwise-angle-using-python
-
-    Returns
-    -------
-    angle
-    
-    distance
-    
-
-    '''
-    def __init__(self, origin):
-        self.origin = origin
-
-    def __call__(self, point, refvec = [0, 1]):
-        if self.origin is None:
-            raise NameError("clockwise sorting needs an origin. Please set origin.")
-        # Vector between point and the origin: v = p - o
-        vector = [point[0]-self.origin[0], point[1]-self.origin[1]]
-        # Length of vector: ||v||
-        lenvector = np.linalg.norm(vector[0] - vector[1])
-        # If length is zero there is no angle
-        if lenvector == 0:
-            return -pi, 0
-        # Normalize vector: v/||v||
-        normalized = [vector[0]/lenvector, vector[1]/lenvector]
-        dotprod  = normalized[0]*refvec[0] + normalized[1]*refvec[1] # x1*x2 + y1*y2
-        diffprod = refvec[1]*normalized[0] - refvec[0]*normalized[1] # x1*y2 - y1*x2
-        angle = math.atan2(diffprod, dotprod)
-        # Negative angles represent counter-clockwise angles so we need to 
-        # subtract them from 2*pi (360 degrees)
-        if angle < 0:
-            return 2*math.pi+angle, lenvector
-        # I return first the angle because that's the primary sorting criterium
-        # but if two vectors have the same angle then the shorter distance 
-        # should come first.
-        return angle, lenvector
 
 
 # Detect stickers in the image
@@ -354,8 +429,7 @@ def sticker_detect(img_ori, save_path):
         
         sticker_crop_img = img_rgb[startY:endY, startX:endX]
 
-      
-        
+
     return  sticker_crop_img
 
 
@@ -374,13 +448,12 @@ def comp_external_contour(orig, thresh, save_path):
     
     print("contour length {}".format(len(contours)))
     
-    
+    '''
     list_of_pts = []
     
     if len(contours) > 1:
         
         
-        '''
         for ctr in contours:
             
             list_of_pts += [pt[0] for pt in ctr]
@@ -394,16 +467,15 @@ def comp_external_contour(orig, thresh, save_path):
         contours_joined = np.array(list_of_pts).reshape((-1,1,2)).astype(np.int32)
         
         
-        '''
-        kernel = np.ones((4,4), np.uint8)
+        
+        kernel = np.ones((size_kernel,size_kernel), np.uint8)
 
         dilation = cv2.dilate(thresh.copy(), kernel, iterations = 1)
         
         closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
         
         trait_img = closing
-        
-    
+    '''
 
     
     #trait_img = cv2.drawContours(thresh, contours_joined, -1, (0,255,255), -1)
@@ -412,24 +484,132 @@ def comp_external_contour(orig, thresh, save_path):
     
     #trait_img = cv2.rectangle(thresh, (x, y), (x+w, y+h), (255, 255, 0), 3)
     
-    contours, hier = cv2.findContours(trait_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    #contours, hier = cv2.findContours(trait_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    print("contour length {}".format(len(contours)))
+    #print("contour length {}".format(len(contours)))
     
+    trait_img_bk = orig.copy()
+    
+    trait_img = orig.copy()
+    
+    box_coord_rec = []
+    
+    
+    lab = cv2.cvtColor(orig.copy(), cv2.COLOR_BGR2LAB)
+    
+    i = 0
+    
+    cl = ColorLabeler()
     
     for c in contours:
+        
+        #shape detection
+        #################################################################
+        '''
+        # here we are ignoring first counter because 
+        # findcontour function detects whole image as shape
+        if i == 0:
+            i = 1
+            continue
+        
+        #hull = cv2.convexHull(c)
+        
+        # cv2.approxPloyDP() function to approximate the shape
+        approx = cv2.approxPolyDP(c, 0.01 * cv2.arcLength(c, True), True)
+
+        # using drawContours() function
+        #trait_img = cv2.drawContours(orig, [c], 0, (0, 0, 255), 10)
+  
+        # finding center point of shape
+        M = cv2.moments(c)
+        
+        if M['m00'] != 0.0:
+            x = int(M['m10']/M['m00'])
+            y = int(M['m01']/M['m00'])
+  
+        # putting shape name at center of each shape
+        if len(approx) == 3:
+            trait_img = cv2.putText(trait_img_bk, 'Triangle', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 0, 255), 10)
+    
+        elif len(approx) == 4:
+            trait_img = cv2.putText(trait_img_bk, 'Quadrilateral', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 0, 255), 10)
+    
+        elif len(approx) == 5:
+            trait_img = cv2.putText(trait_img_bk, 'Pentagon', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 0, 255), 10)
+    
+        elif len(approx) == 6:
+            trait_img = cv2.putText(trait_img_bk, 'Hexagon', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 0, 255), 10)
+    
+        else:
+            trait_img = cv2.putText(trait_img_bk, 'circle', (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 0, 255), 10)
+        '''
+        ############################################################3
+        '''
+        # black image
+        mask = np.zeros((img_height, img_width), dtype=np.uint8)
+        
+        # assign contours in white color
+        mask_contour= cv2.drawContours(mask, [c], 0, 255, -1)
+        
+        masked_fg_contour = cv2.bitwise_and(orig, orig, mask = mask_contour)
+        
+        # Convert color space to LAB space and extract L channel
+        L, A, B = cv2.split(cv2.cvtColor(masked_fg_contour.copy(), cv2.COLOR_BGR2LAB))
+        '''
+        
+        color = cl.label(lab, c)
+
         
         #get the bounding rect
         x, y, w, h = cv2.boundingRect(c)
         
+        ratio_bbx = min(w,h)/max(w,h)
+        
+        rect = cv2.minAreaRect(c)
+        box = cv2.boxPoints(rect)
+        box = np.array(box, dtype="int")
+        box_coord_flat = box.flatten()
+        
+        #print("bbox coordinates :{0}".format(box_coord_flat))
+
+        box_coord = []
+        for item in box_coord_flat:
+            box_coord.append(item)
+            
+        box_coord_rec.append(box_coord)
+        
+        
         #if w>img_width*0.05 and h>img_height*0.05:
             
-        if w>0 and h>0:
+        if w>0 and h>0 and color == 'green':
             
-            offset_w = int(w*0.05)
-            offset_h = int(h*0.05)
+            offset_w = int(w*0.25)
+            offset_h = int(h*0.25)
+            
+            if y-offset_h < 0:
+                start_y = 0
+            else:
+                start_y = y-offset_h
+                
+            if y+h+offset_h > img_height:
+                end_y = img_height
+            else:
+                end_y = y+h+offset_h
+                
+            if x-offset_w < 0:
+                start_x = 0
+            else:
+                start_x = x-offset_w
+                
+            if x+w+offset_w > img_width:
+                end_x = img_width
+            else:
+                end_x = x+w+offset_w
+            
             # draw a green rectangle to visualize the bounding rect
-            roi = orig[y-offset_h : y+h+offset_h, x-offset_w : x+w+offset_w]
+            roi = orig[start_y : end_y, start_x : end_x]
+            
+            #roi = masked_fg_contour[start_y : end_y, start_x : end_x]
             
             print("ROI {} detected ...".format(index))
             
@@ -439,17 +619,19 @@ def comp_external_contour(orig, thresh, save_path):
             
             cv2.imwrite(result_file, roi)
             
-            trait_img = cv2.rectangle(orig, (x, y), (x+w, y+h), (255, 255, 0), 3)
+            #trait_img = cv2.rectangle(orig, (x, y), (x+w, y+h), (255, 255, 0), 3)
             
+            #trait_img = cv2.drawContours(orig, c, -1, (0,255,255), -1)
             
+            trait_img = cv2.rectangle(trait_img_bk, (x, y), (x+w, y+h), (255, 255, 0), 3)
             
-            #trait_img = cv2.putText(orig, "#{}".format(index), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 3.0, (255, 0, 255), 10)
+            trait_img = cv2.putText(trait_img_bk, "#{}".format(index), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (255, 0, 255), 10)
             
             index+= 1
      
-            
+    
 
-    return trait_img
+    return trait_img, box_coord_rec
 
 
 
@@ -461,9 +643,13 @@ def segmentation(image_file):
     
     filename, file_extension = os.path.splitext(image_file)
     
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    
     file_size = os.path.getsize(image_file)/MBFACTOR
     
     print("Segmenting image : {0} \n".format(str(filename)))
+    
+    #print("Base image : {0} \n".format(str(base_name)))
     
     # load original image
     image = cv2.imread(image_file)
@@ -480,11 +666,13 @@ def segmentation(image_file):
     mkdir(mkpath)
     save_path = mkpath + '/'
     
-    mkpath_sticker = os.path.dirname(abs_path) +'/' + base_name + '/sticker'
-    mkdir(mkpath_sticker)
-    save_path_sticker = mkpath_sticker + '/'
+    
+    mkpath_mask = os.path.dirname(abs_path) +'/' + base_name + '/mask'
+    mkdir(mkpath_mask)
+    save_path_mask = mkpath_mask + '/'
     
     print("results_folder: {0}\n".format(str(save_path)))  
+    
     
     if (file_size > 5.0):
         print("It will take some time due to large file size {0} MB".format(str(int(file_size))))
@@ -493,21 +681,83 @@ def segmentation(image_file):
     
     #make backup image
     orig = image.copy()
+    
+    
+    # Convert color space to LAB space and extract L channel
+    L, A, B = cv2.split(cv2.cvtColor(orig.copy(), cv2.COLOR_BGR2LAB))
+    
+    # save Lab result
+    result_file = (save_path_mask + base_name + '_L.' + ext)
+    cv2.imwrite(result_file, L)
+    
+    # save Lab result
+    result_file = (save_path_mask + base_name + '_A.' + ext)
+    cv2.imwrite(result_file, A)
+    
+    # save Lab result
+    result_file = (save_path_mask + base_name + '_B.' + ext)
+    cv2.imwrite(result_file, B)
+    
+    
+    #min_size = 2000
 
     #color clustering based plant object segmentation
-    thresh = color_cluster_seg(orig, args_colorspace, args_channels, args_num_clusters, min_size = 100)
+    thresh = color_cluster_seg(orig, args_colorspace, args_channels, args_num_clusters, min_size)
     
-    result_mask = save_path + 'mask.' + ext
+    result_mask = save_path_mask + base_name + '_mask.' + ext
     
     cv2.imwrite(result_mask, thresh)
     
     
     #find external contour and segment image into small ROI based on each plant
-    trait_img = comp_external_contour(image.copy(), thresh, save_path)
+    (trait_img, box_coord_rec) = comp_external_contour(image.copy(), thresh, save_path)
     
-    result_file = abs_path +  '_label.' + ext
+    #print("bbox coordinates :{0}".format(box_coord_rec))
+    
+    result_file = save_path_mask + base_name + '_label.' + ext
             
     cv2.imwrite(result_file, trait_img)
+    '''
+    
+    #########################################################validation purpose, can be removed 
+    #write out box coordinates for validation
+    #print("bbox coordinates :{0}".format((box_coord_rec)))
+    
+    wb = openpyxl.Workbook()
+    sheet = wb.active
+    
+    sheet_leaf = wb.create_sheet()
+
+    sheet.cell(row = 1, column = 1).value = 'c1x'
+    sheet.cell(row = 1, column = 2).value = 'c1y'
+    sheet.cell(row = 1, column = 3).value = 'c2x'
+    sheet.cell(row = 1, column = 4).value = 'c2y'
+    sheet.cell(row = 1, column = 5).value = 'c3x'
+    sheet.cell(row = 1, column = 6).value = 'c3y'
+    sheet.cell(row = 1, column = 7).value = 'c4x'
+    sheet.cell(row = 1, column = 8).value = 'c4y'
+    
+    for row in box_coord_rec:
+        sheet.append(row)
+   
+    #file name and path
+    bbox_file = (args["path"] + base_name + '_bbox.xlsx')
+    
+    wb.save(bbox_file)
+    
+    bbox_file_csv = (args["path"] + base_name + '_bbox.csv')
+    #convert xlsx to csv format
+    wb = openpyxl.load_workbook(bbox_file)
+    sh = wb.active # was .get_active_sheet()
+    with open(bbox_file_csv, 'w', newline = "") as f:
+        c = csv.writer(f)
+        for r in sh.rows: # generator; was sh.rows
+            c.writerow([cell.value for cell in r])
+            
+        #################################################################end of validation file
+    '''
+    
+    
     
     '''
     (sticker_crop_img) = sticker_detect(image.copy(), save_path)
@@ -545,7 +795,9 @@ if __name__ == '__main__':
     ap.add_argument('-c', '--channels', type = str, default='1', help='Channel indices to use for clustering, where 0 is the first channel,' 
                                                                        + ' 1 is the second channel, etc. E.g., if BGR color space is used, "02" ' 
                                                                        + 'selects channels B and R. (default "all")')
-    ap.add_argument('-n', '--num-clusters', type = int, default = 2,  help = 'Number of clusters for K-means clustering (default 3, min 2).')
+    ap.add_argument('-n', '--num-clusters', type = int, default = 2,  help = 'Number of clusters for K-means clustering (default 2, min 2).')
+    ap.add_argument('-min', '--min_size', type = int, default = 100,  help = 'min size of object to be segmented.')
+    ap.add_argument('-max', '--max_size', type = int, default = 10000000,  help = 'max size of object to be segmented.')
     args = vars(ap.parse_args())
     
     
@@ -557,6 +809,8 @@ if __name__ == '__main__':
     args_colorspace = args['color_space']
     args_channels = args['channels']
     args_num_clusters = args['num_clusters']
+    min_size = args['min_size']
+    max_size = args['max_size']
 
     #accquire image file list
     filetype = '*.' + ext
@@ -566,12 +820,17 @@ if __name__ == '__main__':
     imgList = sorted(glob.glob(image_file_path))
     
     
+    size_kernel = 3
+    
+    
+   
+    '''
     global  template
     template_path = "/home/suxing/smart_plant/marker_template/sticker_template.jpg"
     # Read the template 
     template = cv2.imread(template_path, 0) 
     print(template)
-    
+    '''
     #print((imgList))
     
     #current_img = imgList[0]
@@ -583,8 +842,6 @@ if __name__ == '__main__':
     #agents = psutil.cpu_count()   
     agents = multiprocessing.cpu_count()
     print("Using {0} cores to perform parallel processing... \n".format(int(agents)))
-    
-    
     
     # Create a pool of processes. By default, one is created for each CPU in the machine.
     # extract the bouding box for each image in file list
