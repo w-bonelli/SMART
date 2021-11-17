@@ -3,7 +3,11 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/smart
-commands: smart traits $INPUT -o $(dirname $INPUT) -l 0.1 -t /opt/smart/marker_template.png
+commands: /opt/smart/plantit_pipeline.sh
+params:
+  - name: Multiple
+    type: boolean
+    default: False
 input:
   kind: directory
   path:
@@ -18,8 +22,8 @@ output:
       - csv
       - xlsx
 logo: media/rosette.jpg
-resources:
-  time: "04:00:00"
-  mem: "5GB"
+jobqueue:
+  walltime: "04:00:00"
+  memory: "5GB"
   processes: 1
   cores: 12
