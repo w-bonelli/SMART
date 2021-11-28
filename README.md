@@ -12,7 +12,7 @@ Robust and parameter-free plant image segmentation and trait extraction.
 2. Robust segmentation based on parameter-free color clustering method.
 3. Extract individual plant gemetrical traits, and write output into excel file.
 
-<<<<<<< HEAD
+
 ## Requirements
 
 Either [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/) is required to run this project in a Unix environment.
