@@ -1,4 +1,4 @@
-# Arabidopsis Rosette Analysis
+# Speedy Measurement of Arabidopsis Rosette Traits (SMART)
 
 Author: Suxing Liu
 
