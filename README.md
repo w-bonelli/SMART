@@ -22,6 +22,7 @@ Either [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/sin
 ### Docker
 
 ```bash
+docker pull computationalplantscience/smart
 docker run -v "$(pwd)":/opt/arabidopsis-rosette-analysis -w /opt/arabidopsis-rosette-analysis computationalplantscience/arabidopsis-rosette-analysis python3 /opt/arabidopsis-rosette-analysis/trait_extract_parallel.py -i input -o output -ft "jpg,png"
 ```
 
