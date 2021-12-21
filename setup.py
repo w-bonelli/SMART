@@ -41,7 +41,7 @@ setuptools.setup(
         'scikit-image',
         'scikit-build',
         'scipy',
-        'Pillow'
+        'Pillow==8.4.0'
     ],
     setup_requires=['wheel'],
     tests_require=['pytest', 'coveralls'])
