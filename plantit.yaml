@@ -1,7 +1,7 @@
 name: "SMART: Speedy Measurement of Arabidopsis Rosette Traits"
 author: Suxing Liu
 public: True
-clone: True
+doi: 10.1101/2021.12.17.472861
 image: docker://computationalplantscience/smart
 commands: /opt/smart/plantit_pipeline.sh
 params:
