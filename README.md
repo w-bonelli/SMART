@@ -74,4 +74,4 @@ You can also use a folder path as above, likewise for filetype specification.
 By default this script will not perform leaf segmentation and analysis. To enable leaf analysis, use the `-l` flag.
 
 To indicate that your input is a multiple-tray or -individual photo, add the `-m` flag.
->>>>>>> 31fead956a4c8a971e7ac8797cd20e3d60db94c2
+
