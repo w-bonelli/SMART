@@ -21,7 +21,7 @@ output:
       - png
       - csv
       - xlsx
-logo: media/rosette.jpg
+logo: media/smart.png
 jobqueue:
   walltime: "04:00:00"
   memory: "5GB"
