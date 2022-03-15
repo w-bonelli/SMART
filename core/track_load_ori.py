@@ -58,7 +58,7 @@ import itertools
 from tabulate import tabulate
 import pandas as pd
 
-import  moviepy.editor as mpy
+import moviepy.editor as mpy
 
 '''
 from skimage.morphology import skeletonize

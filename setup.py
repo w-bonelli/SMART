@@ -41,7 +41,10 @@ setuptools.setup(
         'scikit-image',
         'scikit-build',
         'scipy',
-        'Pillow==9.0.1'
+        'Pillow==9.0.1',
+        'mayavi',
+        'progressbar',
+        'moviepy'
     ],
     setup_requires=['wheel'],
     tests_require=['pytest', 'coveralls'])
