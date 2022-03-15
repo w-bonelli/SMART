@@ -4,7 +4,7 @@ Author: Suxing Liu
 
 ![CI](https://github.com/Computational-Plant-Science/arabidopsis-rosette-analysis/workflows/CI/badge.svg)
 
-![Optional Text](../master/media/image_01.png) 
+![Optional Text](../master/media/Smart.png) 
 
 Robust and parameter-free plant image segmentation and trait extraction.
 
@@ -15,7 +15,7 @@ Robust and parameter-free plant image segmentation and trait extraction.
 
 ## Requirements
 
-Either [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/) is required to run this project in a Unix environment.
+Either [Docker](https://www.docker.com/) or [Singularity](https://sylabs.io/singularity/) is required to run this project in a Unix environment.
 
 ## Usage
 
@@ -31,7 +31,7 @@ docker run -v "$(pwd)":/opt/arabidopsis-rosette-analysis -w /opt/arabidopsis-ros
 ```bash
 singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 trait_extract_parallel.py -i input -o output -ft "jpg,png"
 ```
-=======
+
 ![Optional Text](../master/media/image_01.png)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -74,4 +74,4 @@ You can also use a folder path as above, likewise for filetype specification.
 By default this script will not perform leaf segmentation and analysis. To enable leaf analysis, use the `-l` flag.
 
 To indicate that your input is a multiple-tray or -individual photo, add the `-m` flag.
->>>>>>> 31fead956a4c8a971e7ac8797cd20e3d60db94c2
+

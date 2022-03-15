@@ -17,6 +17,9 @@ time python3 demo_trait_extract_parallel.py -p ~/example/test/ -ft jpg
 
 time python3 demo_trait_extract_parallel.py -p ~/plant-image-analysis/demo_test/16-1_6-25/ -ft jpg
 
+time python3 demo_trait_extract_parallel_val.py -p ~/example/pi_images/22-4_6-27/mask_reverse/ -ft jpg -min 500 -tp ~/example/pi_images/marker_template/16-1_6-23_sticker_match.jpg
+
+
 '''
 
 # import the necessary packages
