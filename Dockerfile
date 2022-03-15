@@ -5,7 +5,7 @@ LABEL maintainer="Suxing Liu, Wes Bonelli"
 COPY . /opt/smart
 
 RUN apt-get update && \
-    apt-get install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
     build-essential \
     python3-setuptools \
     python3-pip \
@@ -15,7 +15,8 @@ RUN apt-get update && \
     libsm6 \
     libxext6 \
     libfontconfig1 \
-    libxrender1
+    libxrender1 \
+    libglib2.0-0
 
 WORKDIR /opt/smart
 
