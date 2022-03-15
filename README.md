@@ -15,7 +15,7 @@ Robust and parameter-free plant image segmentation and trait extraction.
 
 ## Requirements
 
-Either [Docker](https://www.docker.com/) or [Singularity ](https://sylabs.io/singularity/) is required to run this project in a Unix environment.
+Either [Docker](https://www.docker.com/) or [Singularity](https://sylabs.io/singularity/) is required to run this project in a Unix environment.
 
 ## Usage
 
@@ -31,7 +31,7 @@ docker run -v "$(pwd)":/opt/arabidopsis-rosette-analysis -w /opt/arabidopsis-ros
 ```bash
 singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis python3 trait_extract_parallel.py -i input -o output -ft "jpg,png"
 ```
-=======
+
 ![Optional Text](../master/media/image_01.png)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->

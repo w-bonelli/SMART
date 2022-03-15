@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 LABEL maintainer="Suxing Liu, Wes Bonelli"
 
@@ -17,8 +17,10 @@ RUN apt-get update && \
     libfontconfig1 \
     libxrender1
 
+WORKDIR /opt/smart
+
 RUN pip3 install --upgrade pip && \
-    pip3 install -e /opt/smart
+    pip3 install -e .
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
