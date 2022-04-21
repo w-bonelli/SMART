@@ -67,6 +67,7 @@ from scipy.spatial import distance as dist
 from collections import OrderedDict
 
 
+
 class ColorLabeler:
     def __init__(self):
         # initialize the colors dictionary, containing the color

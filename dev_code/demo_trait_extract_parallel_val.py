@@ -85,6 +85,7 @@ from collections import OrderedDict
 
 MBFACTOR = float(1<<20)
 
+
 # define class for curvature computation
 class ComputeCurvature:
 

@@ -21,6 +21,7 @@ time python3 demo_trait_extract_parallel.py -p ~/example/pi_images/22-4_6-27/mas
 
 '''
 
+
 # import the necessary packages
 import os
 import glob
