@@ -2037,8 +2037,8 @@ def extract_traits(image_file):
     #result_file = (save_path + base_name + '_combined_mask' + file_extension)
     #cv2.imwrite(result_file, combined_mask)
     
-    # #combine external contours and internal contours 
-    thresh_combined_mask = cv2.threshold(combined_mask, 128, 255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    # combine external contours and internal contours 
+    thresh_combined_mask = cv2.threshold(combined_mask, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
     
     # find contours in the thresholded image
     cnts = cv2.findContours(thresh_combined_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -2537,34 +2537,34 @@ if __name__ == '__main__':
  
     # assign traits label names
     sheet_pixel.cell(row = 1, column = 1).value = 'filename'
-    sheet_pixel.cell(row = 1, column = 2).value = 'tag_info'
-    sheet_pixel.cell(row = 1, column = 3).value = 'avg_kernel_size'
-    sheet_pixel.cell(row = 1, column = 4).value = 'avg_n_kernels_valid'
-    sheet_pixel.cell(row = 1, column = 5).value = 'avg_n_kernels_all'
-    sheet_pixel.cell(row = 1, column = 6).value = 'avg_kernel_area'
-    sheet_pixel.cell(row = 1, column = 7).value = 'avg_kernel_area_ratio'
-    sheet_pixel.cell(row = 1, column = 8).value = 'avg_width'
-    sheet_pixel.cell(row = 1, column = 9).value = 'avg_height'
-    sheet_pixel.cell(row = 1, column = 10).value = 'coins_width_avg'
-    sheet_pixel.cell(row = 1, column = 11).value = 'coin_size'
-    sheet_pixel.cell(row = 1, column = 12).value = 'pixel_cm_ratio'
+    sheet_pixel.cell(row = 1, column = 2).value = 'tag info'
+    sheet_pixel.cell(row = 1, column = 3).value = 'average kernel size'
+    sheet_pixel.cell(row = 1, column = 4).value = 'average number of valid kernels'
+    sheet_pixel.cell(row = 1, column = 5).value = 'average number of all kernels'
+    sheet_pixel.cell(row = 1, column = 6).value = 'average kernel area'
+    sheet_pixel.cell(row = 1, column = 7).value = 'average kernel area ratio'
+    sheet_pixel.cell(row = 1, column = 8).value = 'average width'
+    sheet_pixel.cell(row = 1, column = 9).value = 'average height'
+    sheet_pixel.cell(row = 1, column = 10).value = 'average coins width'
+    sheet_pixel.cell(row = 1, column = 11).value = 'average coin size'
+    sheet_pixel.cell(row = 1, column = 12).value = 'pixel/cm ratio'
     sheet_pixel.cell(row = 1, column = 13).value = 'brightness'
     sheet_pixel.cell(row = 1, column = 14).value = 'blurry_value'
 
 
     # assign traits label names
     sheet_cm.cell(row = 1, column = 1).value = 'filename'
-    sheet_cm.cell(row = 1, column = 2).value = 'tag_info'
-    sheet_cm.cell(row = 1, column = 3).value = 'avg_kernel_size'
-    sheet_cm.cell(row = 1, column = 4).value = 'avg_n_kernels_valid'
-    sheet_cm.cell(row = 1, column = 5).value = 'avg_n_kernels_all'
-    sheet_cm.cell(row = 1, column = 6).value = 'avg_kernel_area'
-    sheet_cm.cell(row = 1, column = 7).value = 'avg_kernel_area_ratio'
-    sheet_cm.cell(row = 1, column = 8).value = 'avg_width'
-    sheet_cm.cell(row = 1, column = 9).value = 'avg_height'
-    sheet_cm.cell(row = 1, column = 10).value = 'coins_width_avg'
-    sheet_cm.cell(row = 1, column = 11).value = 'coin_size'
-    sheet_cm.cell(row = 1, column = 12).value = 'pixel_cm_ratio'
+    sheet_cm.cell(row = 1, column = 2).value = 'tag info'
+    sheet_cm.cell(row = 1, column = 3).value = 'average kernel size'
+    sheet_cm.cell(row = 1, column = 4).value = 'average number of valid kernels'
+    sheet_cm.cell(row = 1, column = 5).value = 'average number of all kernels'
+    sheet_cm.cell(row = 1, column = 6).value = 'average kernel area'
+    sheet_cm.cell(row = 1, column = 7).value = 'average kernel area ratio'
+    sheet_cm.cell(row = 1, column = 8).value = 'average width'
+    sheet_cm.cell(row = 1, column = 9).value = 'average height'
+    sheet_cm.cell(row = 1, column = 10).value = 'average coins width'
+    sheet_cm.cell(row = 1, column = 11).value = 'average coin size'
+    sheet_cm.cell(row = 1, column = 12).value = 'pixel/cm ratio'
     sheet_cm.cell(row = 1, column = 13).value = 'brightness'
     sheet_cm.cell(row = 1, column = 14).value = 'blurry_value'
         

@@ -25,8 +25,7 @@ import argparse
 from sklearn.cluster import KMeans
 
 from skimage.feature import peak_local_max
-from skimage.morphology import medial_axis
-from skimage.segmentation import watershed
+from skimage.morphology import watershed, medial_axis
 from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
 from skimage import measure
 

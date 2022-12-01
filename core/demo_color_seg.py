@@ -19,8 +19,8 @@ USAGE:
 
 python3 demo_color_seg.py -p ~/plant-image-analysis/test/ -ft JPG
 
-
 '''
+
 
 # import the necessary packages
 import os
@@ -29,8 +29,7 @@ import argparse
 from sklearn.cluster import KMeans
 
 from skimage.feature import peak_local_max
-from skimage.morphology import medial_axis
-from skimage.segmentation import watershed
+from skimage.morphology import watershed, medial_axis
 from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
 from skimage import measure
 from skimage.segmentation import clear_border
@@ -503,7 +502,7 @@ def segmentation(image_file):
     
     
     #find external contour and segment image into small ROI based on each plant
-    trait_img = comp_external_contours(image.copy(), thresh, save_path)
+    trait_img = comp_external_contour(image.copy(), thresh, save_path)
     
     result_file = abs_path +  '_label.' + ext
             
@@ -554,7 +553,6 @@ def segmentation(image_file):
     
     #return thresh
     #trait_img
-    
     
     
 
@@ -635,7 +633,7 @@ if __name__ == '__main__':
     
     
     #find external contour 
-    #trait_img = comp_external_contours(image.copy(),thresh, file_path)
+    #trait_img = comp_external_contour(image.copy(),thresh, file_path)
     
     #save segmentation result
     #result_file = (save_path + filename + '_excontour' + file_extension)

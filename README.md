@@ -34,6 +34,10 @@ singularity exec docker://computationalplantscience/arabidopsis-rosette-analysis
 
 ![Optional Text](../master/media/image_01.png)
 
+![Optional Text](../master/media/Slide1.png)
+
+![Optional Text](../master/media/Slide2.png)
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Contents**
@@ -57,17 +61,11 @@ Singularity users:
 
 ## Usage
 
-### Segmentation
-
-To perform color segmentation:
-
-`python3 /opt/smart/core/color_seg.py -p /path/to/input/file -r /path/to/output/folder`
-
-You can also pass a folder path (`-p /path/to/dir`). By default any `JPG` and `PNG` are included. You can choose filetype explicitly with e.g. `-ft jpg`.
+You can pass a folder path (`-p /path/to/dir`). By default any `JPG` and `PNG` are included. You can choose filetype explicitly with e.g. `-ft jpg`.
 
 To extract traits:
 
-`python3 /opt/smart/core/trait_extract_parallel_ori.py -p /path/to/input/file -r /path/to/output/folder`
+`python3 /opt/smart/core/trait_extract_parallel_demo.py -p /path/to/input/file -r /path/to/output/folder`
 
 You can also use a folder path as above, likewise for filetype specification.
 

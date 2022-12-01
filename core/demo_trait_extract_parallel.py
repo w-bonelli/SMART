@@ -17,7 +17,10 @@ time python3 demo_trait_extract_parallel.py -p ~/example/test/ -ft jpg
 
 time python3 demo_trait_extract_parallel.py -p ~/plant-image-analysis/demo_test/16-1_6-25/ -ft jpg
 
+time python3 demo_trait_extract_parallel.py -p ~/example/pi_images/22-4_6-27/mask_reverse/ -ft jpg -min 500 -tp ~/example/pi_images/marker_template/16-1_6-23_sticker_match.jpg
+
 '''
+
 
 # import the necessary packages
 import os
@@ -35,7 +38,7 @@ from skimage.feature import peak_local_max
 from skimage.morphology import medial_axis
 from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
 from skimage import measure
-from skimage.color import rgb2lab, deltaE_cie76, gray2rgb
+from skimage.color import rgb2lab, deltaE_cie76
 from skimage import morphology
 from skimage.segmentation import clear_border, watershed
 from skimage.measure import regionprops
@@ -76,7 +79,6 @@ from contextlib import closing
 from pathlib import Path 
 
 from matplotlib import collections
-
 
 
 MBFACTOR = float(1<<20)

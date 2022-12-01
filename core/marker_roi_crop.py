@@ -1,15 +1,15 @@
 '''
-Name: circle_detection.py
+Name: sticker_detection.py
 
 Version: 1.0
 
-Summary: Detect circle shape markers in image and cropp image based on marker location
+Summary: Detect sticker shape markers in image and cropp image based on marker location
     
 Author: suxing liu
 
 Author-email: suxingliu@gmail.com
 
-Created: 2021-03-09
+Created: 2018-03-09
 
 USAGE:
 
@@ -19,13 +19,11 @@ time python3 marker_roi_crop.py -p ~/plant-image-analysis/test/ -ft png
 
 # import necessary packages
 import argparse
-from os.path import join
-
 import cv2
 import numpy as np
 import os
 import glob
-from pathlib import Path
+from pathlib import Path 
 
 import psutil
 import concurrent.futures
@@ -38,121 +36,181 @@ import openpyxl
 
 from pathlib import Path
 
+
 # generate foloder to store the output results
-from options import ImageInput
-
-
-TEMPLATE_PATH = "/opt/spg-topdown-traits/marker_template/template.png"
-
-
 def mkdir(path):
     # import module
     import os
-
+ 
     # remove space at the beginning
-    path = path.strip()
+    path=path.strip()
     # remove slash at the end
-    path = path.rstrip("\\")
-
+    path=path.rstrip("\\")
+ 
     # path exist?   # True  # False
-    isExists = os.path.exists(path)
-
+    isExists=os.path.exists(path)
+ 
     # process
     if not isExists:
         # construct the path and folder
-        # print path + ' folder constructed!'
+        #print path + ' folder constructed!'
         # make dir
         os.makedirs(path)
         return True
     else:
         # if exists, return 
-        # print path+' path exists!'
+        #print path+' path exists!'
         return False
 
+# Detect stickers in the image
+def sticker_detect(image_file):
+    
+    image_file_name = Path(image_file).name
+    
+    abs_path = os.path.abspath(image_file)
+    
+    filename, file_extension = os.path.splitext(abs_path)
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    
+    print("Processing image : {0}\n".format(str(image_file)))
+     
+    # save folder construction
+    mkpath = os.path.dirname(abs_path) +'/cropped'
+    mkdir(mkpath)
+    save_path = mkpath + '/'
 
-def circle_detect(options: ImageInput):
+    print ("results_folder: " + save_path)
+    
+   
+
     # load the image, clone it for output, and then convert it to grayscale
-    img_ori = cv2.imread(options.input_file)
+    img_ori = cv2.imread(image_file)
+    
     img_rgb = img_ori.copy()
-
+      
     # Convert it to grayscale 
-    img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-
-    # Store width and height of template in w and h
-    template = cv2.imread(TEMPLATE_PATH, 0)
-    w, h = template.shape[::-1]
-
+    img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY) 
+      
+    # Store width and height of template in w and h 
+    w, h = template.shape[::-1] 
+      
     # Perform match operations. 
     res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-
+    
+    #(minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(res)
+    
+    
     # Specify a threshold 
     threshold = 0.8
-
+      
     # Store the coordinates of matched area in a numpy array 
-    loc = np.where(res >= threshold)
-
+    loc = np.where( res >= threshold)  
+    
     if len(loc):
-        (y, x) = np.unravel_index(res.argmax(), res.shape)
+    
+        (y,x) = np.unravel_index(res.argmax(), res.shape)
+    
         (min_val, max_val, min_loc, max_loc) = cv2.minMaxLoc(res)
-
-        print(y, x)
+    
+        print(y,x)
+        
         print(min_val, max_val, min_loc, max_loc)
-
+        
+    
+        (startX, startY) = max_loc
+        endX = startX + template.shape[1]
+        endY = startY + template.shape[0]
+        
         # Draw a rectangle around the matched region. 
-        for pt in zip(*loc[::-1]):
-            circle_overlay = cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
+        for pt in zip(*loc[::-1]): 
+            sticker_overlay = cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0,255,255), 2) 
 
-            # save segmentation result
-        # result_file = (save_path + base_name + '_circle.' + args['filetype'])
-        # print(result_file)
-        # cv2.imwrite(result_file, circle_overlay)
-
-        crop_img = img_rgb[y + 150:y + 850, x - 700:x]
         # save segmentation result
-        cv2.imwrite(join(options.output_directory, f"{options.input_stem}.cropped.png"), crop_img)
+        result_file = (save_path + base_name + '_sticker_matched.' + args['filetype'])
+        print(result_file)
+        cv2.imwrite(result_file, sticker_overlay)
+        
+       
+        crop_img = img_rgb[startY:endY, startX:endX]
+        
+        # save segmentation result
+        result_file = (save_path + base_name + '_cropped.' + args['filetype'])
+        print(result_file)
+        cv2.imwrite(result_file, crop_img)
+        
+    return image_file_name, (x,y)
 
-    return options.input_name, (x, y), crop_img
+
+
 
 
 if __name__ == '__main__':
-
+    
     ap = argparse.ArgumentParser()
-    ap.add_argument("-p", "--path", required=True, help="path to image file")
-    ap.add_argument("-ft", "--filetype", required=True, help="image filetype")
-    ap.add_argument("-o", "--output_directory", required=True, help="directory to write output files to")
+    ap.add_argument("-p", "--path", required = True,    help = "path to image file")
+    ap.add_argument("-ft", "--filetype", required=True,    help = "image filetype")
 
     args = vars(ap.parse_args())
-
+    
+    
     # Setting path to image files
     file_path = args["path"]
-    file_type = args['filetype']
-    output_dir = args['output_directory']
+    ext = args['filetype']
 
     # Extract file type and path
-    filetype = '*.' + file_type
+    filetype = '*.' + ext
     image_file_path = file_path + filetype
-
+    
     # Accquire image file list
     imgList = sorted(glob.glob(image_file_path))
-    options = [ImageInput(input_file=file, output_directory=output_dir) for file in imgList]
-
-    # Read the template
-    template = cv2.imread(TEMPLATE_PATH, 0)
+    
+    global  template
+    template_path = "/home/suxing/smart/marker_template/sticker_template.jpg"
+    # Read the template 
+    template = cv2.imread(template_path, 0) 
     print(template)
+    #imgList = (glob.glob(image_file_path))
 
+    #print((imgList))
+    #global save_path
+    
     # Get number of images in the data folder
     n_images = len(imgList)
-
+    
+    result_list = []
+    
+    
+    # Loop execute
+    for image in imgList:
+        
+        (image_file_name, sticker_overlay) = sticker_detect(image)
+        
+        result_list.append([image_file_name, sticker_overlay])
+        
+        #sticker_detect(image)
+   
+    '''
+    # Parallel processing
+    
     # get cpu number for parallel processing
-    agents = psutil.cpu_count()
+    agents = psutil.cpu_count()   
+    #agents = multiprocessing.cpu_count() 
+    #agents = 8
+    
     print("Using {0} cores to perfrom parallel processing... \n".format(int(agents)))
-
+    
     # Create a pool of processes. By default, one is created for each CPU in the machine.
-    with closing(Pool(processes=agents)) as pool:
-        results = pool.map(circle_detect, options)
+    # extract the bouding box for each image in file list
+    with closing(Pool(processes = agents)) as pool:
+        result_list = pool.map(sticker_detect, imgList)
         pool.terminate()
-
+    '''
+    
     # Output sum table in command window
     print("Summary: {0} plant images were processed...\n".format(n_images))
-    table = tabulate(results, headers=['image_file_name', 'marker coordinates'], tablefmt='orgtbl')
+    
+    table = tabulate(result_list, headers = ['image_file_name', 'marker coordinates'], tablefmt = 'orgtbl')
+
     print(table + "\n")
+    
+

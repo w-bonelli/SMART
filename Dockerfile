@@ -9,8 +9,7 @@
 #docker build -t plant_test -f Dockerfile .
 #docker run -v /path to test image:/images -it plant_test
 #cd /opt/smart/
-#python3 trait_computation_mazie_ear.py -p /images/ -ft png
-#python3 trait_computation_maize_tassel.py -p /images/ -ft png
+#python3 trait_extract_parallel_demo.py -p ~/example/plant_test/ -ft png
 
 
 FROM ubuntu:22.04
