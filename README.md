@@ -61,6 +61,13 @@ Singularity users:
 
 ## Usage
 
+Input image requirement:
+
+Plant top view image captured by HD resolution RGB camera, prefer black background with even illumination environment. 
+
+Example input can be downled from "/sample_test/" folder, which contains top view images of a same Arabidopsis plant from different timepoints. 
+
+
 You can pass a folder path (`-p /path/to/dir`). By default any `JPG` and `PNG` are included. You can choose filetype explicitly with e.g. `-ft jpg`.
 
 To extract traits:
