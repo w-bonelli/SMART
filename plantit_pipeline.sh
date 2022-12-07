@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 /opt/smart/core/trait_extract_parallel_demo.py -p $INPUT -ft jpg
+python3 /opt/smart/core/trait_extract_parallel_demo.py -p $INPUT -m $MULTIPLE -l
