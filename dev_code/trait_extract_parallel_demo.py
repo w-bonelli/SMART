@@ -13,7 +13,7 @@ Created: 2018-09-29
 
 USAGE:
 
-time python3 trait_extract_parallel_demo.py -p ~/example/plant_test/mi_test/ -ft png -min 100 -md 5  
+time python3 trait_extract_parallel_demo.py -p ~/example/plant_test/mi_test/ -ft png 
 
 
 '''
@@ -66,12 +66,13 @@ from tabulate import tabulate
 import warnings
 warnings.filterwarnings("ignore")
 
+'''
 import psutil
 import concurrent.futures
 import multiprocessing
 from multiprocessing import Pool
 from contextlib import closing
-
+'''
 from pathlib import Path 
 
 from matplotlib import collections
@@ -1706,7 +1707,7 @@ if __name__ == '__main__':
     
     ap = argparse.ArgumentParser()
     ap.add_argument("-p", "--path", required = True,    help="path to image file")
-    ap.add_argument("-ft", "--filetype", required=True,    help="Image filetype")
+    ap.add_argument("-ft", "--filetype", required = False,  default = 'jpg',  help="Image filetype")
     ap.add_argument("-r", "--result", required = False,    help="result path")
     ap.add_argument('-s', '--color-space', type = str, required = False, default ='lab', help='Color space to use: BGR (default), HSV, Lab, YCrCb (YCC)')
     ap.add_argument('-c', '--channels', type = str, required = False, default='1', help='Channel indices to use for clustering, where 0 is the first channel,' 
@@ -1844,17 +1845,19 @@ if __name__ == '__main__':
     
     if os.path.isfile(trait_file):
         # update values
+        # update values
         #Open an xlsx for reading
         wb = openpyxl.load_workbook(trait_file)
 
         #Get the current Active Sheet
-        sheet = wb.active
-        
-        sheet.delete_rows(2, sheet.max_row+1) # for entire sheet
-        
-        sheet_leaf = wb.create_sheet()
-        
-        #sheet_leaf.delete_rows(2, sheet_leaf.max_row+1) # for entire sheet
+        sheet = wb['plant morphological traits']
+
+        sheet.delete_rows(2, sheet_pixel.max_row - 1) # for entire sheet
+
+        #Get the current Active Sheet
+        sheet_cm = wb['leaf specific traits']
+
+        sheet_cm.delete_rows(2, sheet_cm.max_row - 1) # for entire sheet
         
         
 
@@ -1862,8 +1865,10 @@ if __name__ == '__main__':
         # Keep presets
         wb = openpyxl.Workbook()
         sheet = wb.active
+        sheet.title = "plant morphological traits"
         
         sheet_leaf = wb.create_sheet()
+        sheet_leaf.title = "leaf specific traits"
 
         sheet.cell(row = 1, column = 1).value = 'filename'
         sheet.cell(row = 1, column = 2).value = 'leaf_area'
