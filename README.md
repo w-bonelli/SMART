@@ -17,6 +17,8 @@ Robust and parameter-free plant image segmentation and trait extraction.
 
 Either [Docker](https://www.docker.com/) or [Singularity](https://sylabs.io/singularity/) is required to run this project in a Unix environment.
 
+Input images: Top view of individual plant tray images, default in *.jpg format. 
+
 ## Usage
 
 ### Docker
