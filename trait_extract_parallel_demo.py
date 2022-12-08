@@ -13,7 +13,7 @@ Created: 2018-09-29
 
 USAGE:
 
-time python3 trait_extract_parallel_demo.py -p ~/example/plant_test/  
+time python3 trait_extract_parallel_demo.py -p ~/example/plant_test/  -ft jpg
 
 #Default image type: *.jpg
 
@@ -1583,6 +1583,9 @@ def extract_traits(image_file):
         
          #find external contour 
         (trait_img, area, solidity, max_width, max_height) = comp_external_contour(orig, thresh)
+        
+        
+        
         # save segmentation result
         result_file = (save_path + base_name + '_excontour' + file_extension)
         #print(filename)

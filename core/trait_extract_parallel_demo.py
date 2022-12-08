@@ -13,8 +13,9 @@ Created: 2018-09-29
 
 USAGE:
 
-time python3 trait_extract_parallel_demo.py -p ~/example/plant_test/mi_test/ -ft png -min 100 -md 5  
+time python3 trait_extract_parallel_demo.py -p ~/example/plant_test/  -ft jpg
 
+#Default image type: *.jpg
 
 '''
 
@@ -66,12 +67,13 @@ from tabulate import tabulate
 import warnings
 warnings.filterwarnings("ignore")
 
+'''
 import psutil
 import concurrent.futures
 import multiprocessing
 from multiprocessing import Pool
 from contextlib import closing
-
+'''
 from pathlib import Path 
 
 from matplotlib import collections
@@ -1706,7 +1708,7 @@ if __name__ == '__main__':
     
     ap = argparse.ArgumentParser()
     ap.add_argument("-p", "--path", required = True,    help="path to image file")
-    ap.add_argument("-ft", "--filetype", required=True,    help="Image filetype")
+    ap.add_argument("-ft", "--filetype", required = True,  default = 'jpg',  help="Image filetype")
     ap.add_argument("-r", "--result", required = False,    help="result path")
     ap.add_argument('-s', '--color-space', type = str, required = False, default ='lab', help='Color space to use: BGR (default), HSV, Lab, YCrCb (YCC)')
     ap.add_argument('-c', '--channels', type = str, required = False, default='1', help='Channel indices to use for clustering, where 0 is the first channel,' 
@@ -1929,14 +1931,14 @@ if __name__ == '__main__':
     
     
     
-    '''
+    
     wb = openpyxl.load_workbook(trait_file)
     sh = wb.active # was .get_active_sheet()
     with open(trait_file_csv, 'w', newline = "") as f:
         c = csv.writer(f)
         for r in sh.rows: # generator; was sh.rows
             c.writerow([cell.value for cell in r])
-    '''
+    
 
     
 

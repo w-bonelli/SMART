@@ -63,6 +63,17 @@ Singularity users:
 
 ## Usage
 
+sample test
+
+Input: Individual plant top view images, in jpg or png format
+
+Output: Realted folders with same name of inout image files, which contains image results
+
+and trait.xlsx and trait.csv for summary of traits computation results. 
+
+
+
+
 Input image requirement:
 
 Plant top view image captured by HD resolution RGB camera, prefer black background with even illumination environment. 
@@ -81,4 +92,5 @@ You can also use a folder path as above, likewise for filetype specification.
 By default this script will not perform leaf segmentation and analysis. To enable leaf analysis, use the `-l` flag.
 
 To indicate that your input is a multiple-tray or -individual photo, add the `-m` flag.
+
 
