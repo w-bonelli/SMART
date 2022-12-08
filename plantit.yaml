@@ -4,7 +4,10 @@ public: True
 doi: 10.1101/2021.12.17.472861
 image: docker://computationalplantscience/smart
 commands: /opt/smart/plantit_pipeline.sh
-
+params:
+  - name: Multiple
+    type: boolean
+    default: False
 input:
   kind: directory
   path:
