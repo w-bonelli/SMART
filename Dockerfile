@@ -35,7 +35,7 @@ RUN DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" apt-get install -y \
 
 RUN python3 -m pip install --upgrade pip
 
-#RUN pip3 install --upgrade pip 
+
 RUN pip3 install numpy \
     Pillow \
     scipy \
@@ -55,6 +55,8 @@ RUN pip3 install numpy \
     natsort \
     pathlib \
     pandas 
+
+RUN python3 -m pip install --upgrade Pillow
 
 
 WORKDIR /opt/smart/
