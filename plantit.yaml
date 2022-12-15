@@ -3,13 +3,19 @@ author: Suxing Liu
 public: True
 doi: 10.1101/2021.12.17.472861
 image: docker://computationalplantscience/smart
-commands: /opt/smart/plantit_pipeline.sh
+commands: python3 /opt/smart/core/trait_extract_parallel_demo.py -p $INPUT -n $NUM_CLUSTERS -min $MIN_SIZE -md $MIN_DIST
 params:
-  - name: Multiple
-    type: boolean
-    default: False
+  - name: num_clusters
+    type: int
+    default: 2
+  - name: min_size
+    type: int
+    default: 200
+  - name: min_dist
+    type: int
+    default: 25
 input:
-  kind: directory
+  kind: files
   path:
   filetypes:
     - jpg
@@ -26,4 +32,4 @@ jobqueue:
   walltime: "04:00:00"
   memory: "5GB"
   processes: 1
-  cores: 12
+  cores: 2

@@ -26,9 +26,9 @@ setuptools.setup(
     install_requires=[
         'click',
         'psutil',
-        'numpy== 1.23.2',
-        'numba==0.55.1',
-        'pandas==1.4.1',
+        'numpy',
+        'numba',
+        'pandas',
         'networkx',
         'skan',
         'tabulate',
