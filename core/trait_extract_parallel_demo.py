@@ -22,23 +22,16 @@ time python3 trait_extract_parallel_demo.py -p ~/example/plant_test/  -ft jpg
 # import the necessary packages
 import os
 import glob
-import utils
 
 from collections import Counter
 
-import argparse
-
 from sklearn.cluster import KMeans
-from sklearn.cluster import MiniBatchKMeans
 
 from skimage.feature import peak_local_max
 from skimage.morphology import medial_axis
-from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
-from skimage import measure
-from skimage.color import rgb2lab, deltaE_cie76
+from skimage import img_as_float, img_as_ubyte, img_as_bool
 from skimage import morphology
 from skimage.segmentation import clear_border, watershed
-from skimage.measure import regionprops
 
 from scipy.spatial import distance as dist
 from scipy import optimize
@@ -56,13 +49,10 @@ import argparse
 import cv2
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 import math
 import openpyxl
 import csv
-    
-from tabulate import tabulate
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -74,9 +64,7 @@ import multiprocessing
 from multiprocessing import Pool
 from contextlib import closing
 '''
-from pathlib import Path 
-
-from matplotlib import collections
+from pathlib import Path
 
 import matplotlib.colors
 

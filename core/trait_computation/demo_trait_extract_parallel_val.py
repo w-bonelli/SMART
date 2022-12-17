@@ -26,32 +26,22 @@ time python3 demo_trait_extract_parallel_val.py -p ~/example/pi_images/22-4_6-27
 # import the necessary packages
 import os
 import glob
-import utils
 
 from collections import Counter
 
-import argparse
-
 from sklearn.cluster import KMeans
-from sklearn.cluster import MiniBatchKMeans
 
 from skimage.feature import peak_local_max
 from skimage.morphology import medial_axis
-from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
-from skimage import measure
+from skimage import img_as_float, img_as_bool
 from skimage.color import rgb2lab, deltaE_cie76
 from skimage import morphology
 from skimage.segmentation import clear_border, watershed
-from skimage.measure import regionprops
 
 from scipy.spatial import distance as dist
 from scipy import optimize
 from scipy import ndimage
 from scipy.interpolate import interp1d
-
-from skan import skeleton_to_csgraph, Skeleton, summarize, draw
-
-import networkx as nx
 
 import imutils
 
@@ -60,26 +50,17 @@ import argparse
 import cv2
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 import math
 import openpyxl
-import csv
-    
+
 from tabulate import tabulate
 
 import warnings
 warnings.filterwarnings("ignore")
 
-import psutil
-import concurrent.futures
-import multiprocessing
-from multiprocessing import Pool
-from contextlib import closing
+from pathlib import Path
 
-from pathlib import Path 
-
-from matplotlib import collections
 from collections import OrderedDict
 
 
