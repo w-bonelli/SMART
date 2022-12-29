@@ -29,12 +29,14 @@ import glob
 
 from collections import Counter
 
+import matplotlib as mpl
+from matplotlib.cm import ScalarMappable
 from sklearn.cluster import KMeans
 
 from skimage.feature import peak_local_max
 from skimage.morphology import medial_axis
 from skimage import img_as_float, img_as_bool
-from skimage.color import rgb2lab, deltaE_cie76
+from skimage.color import rgb2lab, deltaE_cie76, gray2rgb
 from skimage import morphology
 from skimage.segmentation import clear_border, watershed
 
@@ -1370,7 +1372,7 @@ def extract_traits(image_file):
     #initialize the colormap
     colormap = mpl.cm.jet
     cNorm = mpl.colors.Normalize(vmin=0, vmax=255)
-    scalarMap = mtpltcm.ScalarMappable(norm=cNorm, cmap=colormap)
+    scalarMap = ScalarMappable(norm=cNorm, cmap=colormap)
     
     # make the folder to store the results
     #current_path = abs_path + '/'

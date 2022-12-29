@@ -20,9 +20,9 @@ Robust and parameter-free plant image segmentation and trait extraction.
 
 ![Optional Text](../master/media/image_01.png)
 
-![Optional Text](../master/media/Slide1.png)
+![Optional Text](../master/media/slides/Slide1.png)
 
-![Optional Text](../master/media/Slide2.png)
+![Optional Text](../master/media/slides/Slide2.png)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -100,9 +100,9 @@ The `trait_extract_parallel.py` script is this repository's main entry point. It
 
 - `-i`: the input file or directory
 - `-o`: the output directory
-- `-ft`: input filetypes
-- `-l`: enable leaf analysis
-- `-m`: toggle multiple plant detection
+- `-ft`: input filetypes (optional)
+- `-l`: enable leaf analysis (optional)
+- `-m`: toggle multiple plant detection (optional)
 
 ### Input
 
